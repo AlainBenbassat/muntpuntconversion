@@ -4,26 +4,16 @@ namespace Muntpuntconversion;
 
 class Convertor {
   public function start() {
-  }
+    $contactFetcher = new SourceContactFetcher();
+    $contactValidator = new SourceContactValidator();
 
-  public function test() {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
-
-    $sql = "
-      SELECT
-        first_name,
-        last_name
-      FROM
-        civicrm_contact
-      where
-        first_name is not null
-      and
-        contact_type = 'Individual'
-      limit 0,20
-    ";
-    $stmt = $pdo->query($sql);
-    while ($row = $stmt->fetch()) {
-      echo $row['last_name'] . ', ' . $row['first_name'] . "\n";
+    $dao = $contactFetcher->getBatch(0, 20000);
+    while ($row = $dao->fetch()) {
+      $contact = $contactFetcher->getContact($row['id']);
+      if ($contactValidator->isValidContact($contact)) {
+        //$contactImporter->importContact($contact);
+      }
     }
   }
+
 }

@@ -11,7 +11,6 @@ function main() {
 
     $convertor = new Muntpuntconversion\Convertor();
     $convertor->start();
-    $convertor->test();
   }
   catch (Exception $e) {
     echo "==============================================\n\n";
