@@ -7,7 +7,7 @@ class Convertor {
     $contactFetcher = new SourceContactFetcher();
     $contactValidator = new SourceContactValidator();
 
-    $dao = $contactFetcher->getBatch(0, 20000);
+    $dao = $contactFetcher->getBatch(0, 50000);
     while ($row = $dao->fetch()) {
       $contact = $contactFetcher->getContact($row['id']);
       if ($contactValidator->isValidContact($contact)) {

@@ -14,11 +14,15 @@ class SourceContactValidator {
     $rating = [];
 
     $this->hasDisplayName($contact, $rating);
+    $this->isIndividualOrOrganization($contact, $rating);
     $this->hasActiveRelationships($contact, $rating);
     $this->isNotSpam($contact, $rating);
     $this->hasActiveLogin($contact, $rating);
     $this->hasPostalAddress($contact, $rating);
     $this->hasEmailAddress($contact, $rating);
+    $this->hasRecentActivities($contact, $rating);
+    $this->hasRecentEventRegistrations($contact,$rating);
+    $this->hasOptedOut($contact, $rating);
 
     $this->calculateScore($rating);
     if ($rating['score'] > 0) {
@@ -36,6 +40,15 @@ class SourceContactValidator {
     }
     else {
       $rating['has display name'] = 0;
+    }
+  }
+
+  private function isIndividualOrOrganization($contact, &$rating) {
+    if ($contact['contact_type'] == 'Individual' || $contact['contact_type'] == 'Organization') {
+      $rating['is Individual or Organization'] = 1;
+    }
+    else {
+      $rating['is Individual or Organization'] = 0;
     }
   }
 
@@ -134,20 +147,111 @@ class SourceContactValidator {
     $contactId = $contact['id'];
     $sql = "
       select
-        id
+        *
       from
         civicrm_email
       where
-        contact_id = $contactId and is_primary = 1
+        contact_id = $contactId
+      and
+        is_primary = 1
     ";
 
     $dao = $pdo->query($sql);
-    $id = $dao->fetchColumn();
-    if ($id) {
+    $row = $dao->fetch();
+    if ($row) {
       $rating['has email address'] = 1;
+      $rating['email on hold'] = $row['on_hold'] == 1 ? 1 : 0;
+      $rating['has unique email address'] = $this->isUniqueEmailAddress($row['email']);
     }
     else {
       $rating['has email address'] = 0;
+      $rating['email on hold'] = 0;
+      $rating['has unique email address'] = 0;
+    }
+  }
+
+  private function isUniqueEmailAddress($email) {
+    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+
+    $quotedEmail = $pdo->quote($email);
+    $sql = "
+      select
+        count(e.id)
+      from
+        civicrm_email e
+      WHERE
+        e.email = $quotedEmail
+      and
+        exists (
+          select * from civicrm_contact c where c.id = e.contact_id and c.is_deleted = 0
+        )
+      group by
+        e.email
+      having
+        count(e.id) > 1
+    ";
+
+    $dao = $pdo->query($sql);
+    $emailCount = $dao->fetchColumn();
+    if ($emailCount) {
+      return 0;
+    }
+    else {
+      return 1;
+    }
+  }
+
+  private function hasRecentActivities($contact, &$rating) {
+    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+
+    $contactId = $contact['id'];
+    $sql = "
+      select
+        count(a.id)
+      from
+        civicrm_activity a
+      inner join
+        civicrm_activity_contact ac on ac.activity_id = a.id
+      where
+        ac.contact_id = $contactId
+      and
+        a.is_deleted = 0
+      and
+        a.activity_date_time >= '2019-01-01'
+    ";
+
+    $dao = $pdo->query($sql);
+    $activityCount = $dao->fetchColumn();
+    if ($activityCount) {
+      $rating['has recent activities'] = 1;
+    }
+    else {
+      $rating['has recent activities'] = 0;
+    }
+  }
+
+  private function hasRecentEventRegistrations($contact, &$rating) {
+    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+
+    $contactId = $contact['id'];
+    $sql = "
+      select
+        count(p.id)
+      from
+        civicrm_participant p
+      where
+        p.contact_id = $contactId
+      and
+        p.register_date >= '2017-01-01'
+    ";
+
+    $dao = $pdo->query($sql);
+    $activityCount = $dao->fetchColumn();
+    if ($activityCount) {
+      $rating['has recent event registrations'] = 1;
+    }
+    else {
+      $rating['has recent event registrations'] = 0;
     }
   }
 
@@ -160,6 +264,15 @@ class SourceContactValidator {
       $rating['is active Drupal account'] = 0;
     }
 
+  }
+
+  private function hasOptedOut($contact, &$rating) {
+    if ($contact['is_opt_out'] == 1) {
+      $rating['has opted out'] = 1;
+    }
+    else {
+      $rating['has opted out'] = 0;
+    }
   }
 
   private function calculateScore(&$rating) {
@@ -182,6 +295,7 @@ class SourceContactValidator {
     $header = [
       'Contact Id',
       'Display Name',
+      'Contact Type'
     ];
 
     foreach ($rating as $k => $v) {
@@ -202,6 +316,7 @@ class SourceContactValidator {
     $row = [
       $contact['id'],
       $contact['display_name'],
+      $contact['contact_type'],
     ];
 
     foreach ($rating as $k => $v) {
