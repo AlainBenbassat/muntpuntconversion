@@ -19,10 +19,12 @@ class SourceContactValidator {
     $this->isNotSpam($contact, $rating);
     $this->hasActiveLogin($contact, $rating);
     $this->hasPostalAddress($contact, $rating);
+    $this->hasPhoneNumber($contact, $rating);
     $this->hasEmailAddress($contact, $rating);
     $this->hasRecentActivities($contact, $rating);
     $this->hasRecentEventRegistrations($contact,$rating);
     $this->hasOptedOut($contact, $rating);
+    $this->isGroupMemberKeepMeInformed($contact, $rating);
 
     $this->calculateScore($rating);
     if ($rating['score'] > 0) {
@@ -36,19 +38,19 @@ class SourceContactValidator {
 
   private function hasDisplayName($contact, &$rating) {
     if (trim($contact['display_name'])) {
-      $rating['has display name'] = 1;
+      $rating['heeft naam'] = 1;
     }
     else {
-      $rating['has display name'] = 0;
+      $rating['heeft naam'] = 0;
     }
   }
 
   private function isIndividualOrOrganization($contact, &$rating) {
     if ($contact['contact_type'] == 'Individual' || $contact['contact_type'] == 'Organization') {
-      $rating['is Individual or Organization'] = 1;
+      $rating['is persoon of organisatie'] = 1;
     }
     else {
-      $rating['is Individual or Organization'] = 0;
+      $rating['is persoon of organisatie'] = 0;
     }
   }
 
@@ -73,29 +75,29 @@ class SourceContactValidator {
     ]);
     $numOfRelationships = $dao->fetchColumn();
     if ($numOfRelationships) {
-      $rating['has active relationships'] = 1;
+      $rating['heeft actieve relaties'] = 1;
     }
     else {
-      $rating['has active relationships'] = 0;
+      $rating['heeft actieve relaties'] = 0;
     }
   }
 
   private function isNotSpam($contact, &$rating) {
     if (strpos($contact['display_name'], '@ssemarketing.net') > 0) {
-      $rating['is spam'] = 1;
+      $rating['is geen spam'] = 0;
     }
     else {
-      $rating['is spam'] = 0;
+      $rating['is geen spam'] = 1;
     }
   }
 
   private function hasActiveLogin($contact, &$rating) {
     $drupalId = $this->getDrupalIdFromUfMatch($contact['id']);
     if ($drupalId) {
-      $rating['has login'] = 1;
+      $rating['heeft Drupal login'] = 1;
     }
     else {
-      $rating['has login'] = 0;
+      $rating['heeft Drupal login'] = 0;
     }
 
     $this->isActiveDrupalUser($drupalId, $rating);
@@ -134,10 +136,33 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $id = $dao->fetchColumn();
     if ($id) {
-      $rating['has postal address'] = 1;
+      $rating['heeft postadres'] = 1;
     }
     else {
-      $rating['has postal address'] = 0;
+      $rating['heeft postadres'] = 0;
+    }
+  }
+
+  private function hasPhoneNumber($contact, &$rating) {
+    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+
+    $contactId = $contact['id'];
+    $sql = "
+      select
+        id
+      from
+        civicrm_phone
+      where
+        contact_id = $contactId and is_primary = 1
+    ";
+
+    $dao = $pdo->query($sql);
+    $id = $dao->fetchColumn();
+    if ($id) {
+      $rating['heeft telefoonnummer'] = 1;
+    }
+    else {
+      $rating['heeft telefoonnummer'] = 0;
     }
   }
 
@@ -159,14 +184,14 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $row = $dao->fetch();
     if ($row) {
-      $rating['has email address'] = 1;
-      $rating['email on hold'] = $row['on_hold'] == 1 ? 1 : 0;
-      $rating['has unique email address'] = $this->isUniqueEmailAddress($row['email']);
+      $rating['heeft e-mailadres'] = 1;
+      $rating['e-mail is niet on-hold'] = $row['on_hold'] == 1 ? 0 : 1;
+      $rating['e-mail is uniek'] = $this->isUniqueEmailAddress($row['email']);
     }
     else {
-      $rating['has email address'] = 0;
-      $rating['email on hold'] = 0;
-      $rating['has unique email address'] = 0;
+      $rating['heeft e-mailadres'] = 0;
+      $rating['e-mail is niet on-hold'] = 0;
+      $rating['e-mail is uniek'] = 0;
     }
   }
 
@@ -223,10 +248,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['has recent activities'] = 1;
+      $rating['heeft recente activiteiten'] = 1;
     }
     else {
-      $rating['has recent activities'] = 0;
+      $rating['heeft recente activiteiten'] = 0;
     }
   }
 
@@ -248,30 +273,59 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['has recent event registrations'] = 1;
+      $rating['heeft recent deelgenomen aan evenementen'] = 1;
     }
     else {
-      $rating['has recent event registrations'] = 0;
+      $rating['heeft recent deelgenomen aan evenementen'] = 0;
     }
   }
 
   private function isActiveDrupalUser($drupalId, $rating) {
     if ($drupalId) {
       // TODO: query users table
-      $rating['is active Drupal account'] = 1;
+      $rating['heeft actief Drupal account'] = 1;
     }
     else {
-      $rating['is active Drupal account'] = 0;
+      $rating['heeft actief Drupal account'] = 0;
     }
 
   }
 
   private function hasOptedOut($contact, &$rating) {
     if ($contact['is_opt_out'] == 1) {
-      $rating['has opted out'] = 1;
+      $rating['is niet opt-out'] = 1;
     }
     else {
-      $rating['has opted out'] = 0;
+      $rating['is niet opt-out'] = 0;
+    }
+  }
+
+  private function isGroupMemberKeepMeInformed($contact, &$rating) {
+    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+
+    $contactId = $contact['id'];
+    $sql = "
+      select
+        count(gc.id)
+      from
+        civicrm_group_contact gc
+      inner join
+        civicrm_group g on g.id = gc.group_id
+      WHERE
+        gc.status = 'Added'
+      and
+        g.title like 'Hou mij op de hoogte%'
+      and
+        gc.contact_id = $contactId
+    ";
+
+    $dao = $pdo->query($sql);
+    $activityCount = $dao->fetchColumn();
+    if ($activityCount) {
+      $rating['lid van groep Hou mij op de hoogte'] = 1;
+    }
+    else {
+      $rating['lid van groep Hou mij op de hoogte'] = 0;
     }
   }
 
