@@ -6,9 +6,12 @@ class SourceContactLogger {
   private const LOG_FILE_MIGRATE = __DIR__ . '/../valid_contacts.csv';
   private const LOG_FILE_DO_NOT_MIGRATE = __DIR__ . '/../invalid_contacts.csv';
   private const LOG_FILE_NEEDS_CLEANUP = __DIR__ . '/../verify_contacts.csv';
+  private const LOG_TABLE = 'migration_contacts';
 
   public function __construct($reset = FALSE) {
     if ($reset) {
+      $this->clearLogTable();
+
       $this->deleteLogFile(self::LOG_FILE_MIGRATE);
       $this->deleteLogFile(self::LOG_FILE_DO_NOT_MIGRATE);
       $this->deleteLogFile(self::LOG_FILE_NEEDS_CLEANUP);
@@ -16,14 +19,18 @@ class SourceContactLogger {
   }
 
   public function printStats() {
-    $output1 = explode(' ', shell_exec('wc -l ' . self::LOG_FILE_MIGRATE));
-    $output2 = explode(' ', shell_exec('wc -l ' . self::LOG_FILE_DO_NOT_MIGRATE));
-    $output3 = explode(' ', shell_exec('wc -l ' . self::LOG_FILE_NEEDS_CLEANUP));
+    $pdo = \Muntpuntconversion\SourceDB::getPDO();
 
-    $numMigrate = reset($output1);
-    $numDoNotMigrate = reset($output2);
-    $numCleanup = reset($output3);
-    $total = $numMigrate + $numDoNotMigrate + $numCleanup - 3; // minus the three headers
+    $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE . ' where  score = ' . SourceContactValidator::FINAL_SCORE_MIGRATE);
+    $numMigrate = $score->fetch()['score_count'];
+
+    $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE . ' where  score = ' . SourceContactValidator::FINAL_SCORE_DO_NOT_MIGRATE);
+    $numDoNotMigrate = $score->fetch()['score_count'];
+
+    $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE . ' where  score = ' . SourceContactValidator::FINAL_SCORE_NEEDS_CLEANUP);
+    $numCleanup = $score->fetch()['score_count'];
+
+    $total = $numMigrate + $numDoNotMigrate + $numCleanup;
     $percentageMigrate = round($numMigrate / $total * 100, 2);
     $percentageDoNotMigrate = round($numDoNotMigrate / $total * 100, 2);
     $percentageCleanup = round($numCleanup / $total * 100, 2);
@@ -34,37 +41,8 @@ class SourceContactLogger {
     echo " - Na te kijken: $numCleanup ($percentageCleanup%)\n";
   }
 
-  public function logMigrate($contact, $rating) {
-    static $logFileCreated = FALSE;
-
-    if ($logFileCreated == FALSE) {
-      $this->createLogFile(self::LOG_FILE_MIGRATE, $rating);
-      $logFileCreated = TRUE;
-    }
-
-    $this->logContact(self::LOG_FILE_MIGRATE, $contact, $rating);
-  }
-
-  public function logDoNotMigrate($contact, $rating) {
-    static $logFileCreated = FALSE;
-
-    if ($logFileCreated == FALSE) {
-      $this->createLogFile(self::LOG_FILE_DO_NOT_MIGRATE, $rating);
-      $logFileCreated = TRUE;
-    }
-
-    $this->logContact(self::LOG_FILE_DO_NOT_MIGRATE, $contact, $rating);
-  }
-
-  public function logNeedsCleanup($contact, $rating) {
-    static $logFileCreated = FALSE;
-
-    if ($logFileCreated == FALSE) {
-      $this->createLogFile(self::LOG_FILE_NEEDS_CLEANUP, $rating);
-      $logFileCreated = TRUE;
-    }
-
-    $this->logContact(self::LOG_FILE_NEEDS_CLEANUP, $contact, $rating);
+  public function export() {
+    // OP BASIS VAN TABEL DE CSV's genereren
   }
 
   private function deleteLogFile($fileName) {
@@ -73,7 +51,38 @@ class SourceContactLogger {
     }
   }
 
+  private function clearLogTable() {
+    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo->query('drop table ' . self::LOG_TABLE);
+  }
+
+  private function createLogTable($rating) {
+    $sql = "
+      create table " . self::LOG_TABLE . "
+      (
+        id int(10) unsigned PRIMARY KEY,
+        display_name varchar(255),
+        contact_type varchar(255),
+        email varchar(255)
+    ";
+
+    foreach ($rating as $k => $v) {
+      if ($k != 'email') {
+        $sql .= ", $k int(5)";
+      }
+    }
+
+    $sql .= ') ENGINE=InnoDB';
+
+    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo->query($sql);
+
+    // add index on email
+    $pdo->query('CREATE INDEX em_' . self::LOG_TABLE . ' ON ' . self::LOG_TABLE . ' (email, id); ');
+  }
+
   private function createLogFile($fileName, $rating) {
+    die('KLOPT NIET');
     $header = [
       'Contact Id',
       'Display Name',
@@ -88,19 +97,41 @@ class SourceContactLogger {
     file_put_contents($fileName, $tabSeparatedColumnNames);
   }
 
-  private function logContact($fileName, $contact, $rating) {
-    $row = [
+  public function logContact($contact, $rating) {
+    static $log_table_created = FALSE;
+
+    if ($log_table_created == FALSE) {
+      $this->createLogTable($rating);
+      $log_table_created = TRUE;
+    }
+
+    $colNames = [
+      'id',
+      'display_name',
+      'contact_type',
+    ];
+    $colPlaceHolders = [
+      '?',
+      '?',
+      '?',
+    ];
+
+    $colValues = [
       $contact['id'],
       $contact['display_name'],
       $contact['contact_type'],
     ];
 
     foreach ($rating as $k => $v) {
-      $row[] = $v;
+      $colNames[] = $k;
+      $colValues[] = $v;
+      $colPlaceHolders[] = '?';
     }
 
-    $tabSeparatedRow = implode("\t", $row) . "\n";
-    file_put_contents($fileName, $tabSeparatedRow, FILE_APPEND);
+    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $sql = 'insert into ' . self::LOG_TABLE . '(' . implode(',', $colNames) . ') values (' . implode(',', $colPlaceHolders) . ');';
+    $stmt= $pdo->prepare($sql);
+    $stmt->execute($colValues);
   }
 
 }

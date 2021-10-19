@@ -36,19 +36,19 @@ class SourceContactValidator {
 
   private function hasDisplayName($contact, &$rating) {
     if (trim($contact['display_name'])) {
-      $rating['heeft naam'] = self::SCORE_NEUTRAL;
+      $rating['heeft_naam'] = self::SCORE_NEUTRAL;
     }
     else {
-      $rating['heeft naam'] = self::SCORE_VERY_BAD;
+      $rating['heeft_naam'] = self::SCORE_VERY_BAD;
     }
   }
 
   private function isIndividualOrOrganization($contact, &$rating) {
     if ($contact['contact_type'] == 'Individual' || $contact['contact_type'] == 'Organization') {
-      $rating['is persoon of organisatie'] = self::SCORE_NEUTRAL;
+      $rating['is_persoon_of_organisatie'] = self::SCORE_NEUTRAL;
     }
     else {
-      $rating['is persoon of organisatie'] = self::SCORE_VERY_BAD;
+      $rating['is_persoon_of_organisatie'] = self::SCORE_VERY_BAD;
     }
   }
 
@@ -73,29 +73,29 @@ class SourceContactValidator {
     ]);
     $numOfRelationships = $dao->fetchColumn();
     if ($numOfRelationships) {
-      $rating['heeft actieve relaties'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_actieve_relaties'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft actieve relaties'] = self::SCORE_NEUTRAL;
+      $rating['heeft_actieve_relaties'] = self::SCORE_NEUTRAL;
     }
   }
 
   private function isNotSpam($contact, &$rating) {
     if (strpos($contact['display_name'], '@ssemarketing.net') > 0) {
-      $rating['is spam'] = self::SCORE_VERY_BAD;
+      $rating['is_spam'] = self::SCORE_VERY_BAD;
     }
     else {
-      $rating['is spam'] = self::SCORE_NEUTRAL;
+      $rating['is_spam'] = self::SCORE_NEUTRAL;
     }
   }
 
   private function hasActiveLogin($contact, &$rating) {
     $drupalId = $this->getDrupalIdFromUfMatch($contact['id']);
     if ($drupalId) {
-      $rating['heeft Drupal login'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_Drupal_login'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft Drupal login'] = self::SCORE_NEUTRAL;
+      $rating['heeft_Drupal_login'] = self::SCORE_NEUTRAL;
     }
 
     $this->isActiveDrupalUser($drupalId, $rating);
@@ -134,10 +134,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $id = $dao->fetchColumn();
     if ($id) {
-      $rating['heeft postadres'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_postadres'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft postadres'] = self::SCORE_NEUTRAL;
+      $rating['heeft_postadres'] = self::SCORE_NEUTRAL;
     }
   }
 
@@ -157,10 +157,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $id = $dao->fetchColumn();
     if ($id) {
-      $rating['heeft telefoonnummer'] = self::SCORE_GOOD;
+      $rating['heeft_telefoonnummer'] = self::SCORE_GOOD;
     }
     else {
-      $rating['heeft telefoonnummer'] = self::SCORE_NEUTRAL;
+      $rating['heeft_telefoonnummer'] = self::SCORE_NEUTRAL;
     }
   }
 
@@ -182,14 +182,16 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $row = $dao->fetch();
     if ($row) {
-      $rating['heeft e-mailadres'] = self::SCORE_VERY_GOOD;
-      $rating['e-mail on-hold'] = $row['on_hold'] == 1 ? self::SCORE_BAD : self::SCORE_NEUTRAL;
-      $rating['e-mail is uniek'] = $this->isUniqueEmailAddress($row['email']) ? self::SCORE_GOOD : self::SCORE_BAD;
+      $rating['email'] = $row['email'];
+      $rating['heeft_emailadres'] = self::SCORE_VERY_GOOD;
+      $rating['email_onhold'] = $row['on_hold'] == 1 ? self::SCORE_BAD : self::SCORE_NEUTRAL;
+      $rating['email_is_uniek'] = $this->isUniqueEmailAddress($row['email']) ? self::SCORE_GOOD : self::SCORE_BAD;
     }
     else {
-      $rating['heeft e-mailadres'] = self::SCORE_BAD;
-      $rating['e-mail on-hold'] = self::SCORE_NEUTRAL;
-      $rating['e-mail is uniek'] = self::SCORE_NEUTRAL;
+      $rating['email'] = '';
+      $rating['heeft_emailadres'] = self::SCORE_BAD;
+      $rating['email_onhold'] = self::SCORE_NEUTRAL;
+      $rating['email_is_uniek'] = self::SCORE_NEUTRAL;
     }
   }
 
@@ -246,10 +248,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['heeft recente activiteiten'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_recente_activiteiten'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft recente activiteiten'] = self::SCORE_NEUTRAL;
+      $rating['heeft_recente_activiteiten'] = self::SCORE_NEUTRAL;
     }
   }
 
@@ -271,30 +273,30 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['heeft recent deelgenomen aan evenementen'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_recent_deelgenomen_aan_evenementen'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft recent deelgenomen aan evenementen'] = self::SCORE_NEUTRAL;
+      $rating['heeft_recent_deelgenomen_aan_evenementen'] = self::SCORE_NEUTRAL;
     }
   }
 
   private function isActiveDrupalUser($drupalId, $rating) {
     if ($drupalId) {
       // TODO: query users table
-      $rating['heeft actief Drupal account'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_actief_Drupal_account'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft actief Drupal account'] = self::SCORE_NEUTRAL;
+      $rating['heeft_actief_Drupal_account'] = self::SCORE_NEUTRAL;
     }
 
   }
 
   private function hasOptedOut($contact, &$rating) {
     if ($contact['is_opt_out'] == 1) {
-      $rating['is opt-out'] = self::SCORE_VERY_BAD;
+      $rating['is_optout'] = self::SCORE_VERY_BAD;
     }
     else {
-      $rating['is opt-out'] = self::SCORE_GOOD;
+      $rating['is_optout'] = self::SCORE_GOOD;
     }
   }
 
@@ -320,10 +322,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['lid van groep Hou mij op de hoogte'] = self::SCORE_VERY_GOOD;
+      $rating['lid_van_groep_hou_mij_op_de_hoogte'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['lid van groep Hou mij op de hoogte'] = self::SCORE_NEUTRAL;
+      $rating['lid_van_groep_hou_mij_op_de_hoogte'] = self::SCORE_NEUTRAL;
     }
   }
 

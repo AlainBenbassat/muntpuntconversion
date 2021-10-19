@@ -14,26 +14,14 @@ class SourceContactScoreGenerator {
   public function start() {
     $contactFetcher = new SourceContactFetcher();
     $contactValidator = new SourceContactValidator();
-    $scoreLogger = new SourceContactLogger();
+    $scoreLogger = new SourceContactLogger(TRUE);
 
     $dao = $contactFetcher->getBatch(0, self::BATCH_LIMIT);
     while ($row = $dao->fetch()) {
       $contact = $contactFetcher->getContact($row['id']);
       $rating = $contactValidator->getValidationRating($contact);
 
-      switch ($rating['score']) {
-        case SourceContactValidator::FINAL_SCORE_MIGRATE:
-          $scoreLogger->logMigrate($contact, $rating);
-          break;
-        case SourceContactValidator::FINAL_SCORE_DO_NOT_MIGRATE:
-          $scoreLogger->logDoNotMigrate($contact, $rating);
-          break;
-        case SourceContactValidator::FINAL_SCORE_NEEDS_CLEANUP:
-          $scoreLogger->logNeedsCleanup($contact, $rating);
-          break;
-        default:
-          throw new \Exception('Invalid score');
-      }
+      $scoreLogger->logContact($contact, $rating);
     }
 
     $scoreLogger->printStats();
