@@ -3,6 +3,12 @@
 namespace Muntpuntconversion;
 
 class SourceContactFetcher {
+  private $onlyValidContacts = FALSE;
+
+  public function __construct($onlyValidContacts = FALSE) {
+    $this->onlyValidContacts = $onlyValidContacts;
+  }
+
   public function getBatch($startingContactId = 0, $numberOfContacts = 300) {
     $pdo = \Muntpuntconversion\SourceDB::getPDO();
 

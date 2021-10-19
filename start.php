@@ -9,10 +9,13 @@ function main() {
     loadClasses();
     bootstrapCiviCRM();
 
+    // Step 1: prepare contact list
     $scoreGenerator = new \Muntpuntconversion\SourceContactScoreGenerator();
     $scoreGenerator->start();
-    //$convertor = new Muntpuntconversion\Convertor();
-    //$convertor->start();
+
+    // Step 2: convert (i.e. migrate contact)
+    $convertor = new Muntpuntconversion\Convertor();
+    $convertor->start();
   }
   catch (Exception $e) {
     echo "==============================================\n\n";

@@ -9,7 +9,7 @@ namespace Muntpuntconversion;
  *   - needs (manual) cleanup (i.e. because it's a duplicate...)
  */
 class SourceContactScoreGenerator {
-  private const BATCH_LIMIT = 20000;
+  private const BATCH_LIMIT = 200;
 
   public function start() {
     $contactFetcher = new SourceContactFetcher();
