@@ -3,14 +3,17 @@
 namespace Muntpuntconversion;
 
 class SourceContactValidator {
-  const LOG_FILE = __DIR__ . '/../invalid_contacts.csv';
-  private $logFileCreated = FALSE;
+  public const FINAL_SCORE_MIGRATE = 1;
+  public const FINAL_SCORE_DO_NOT_MIGRATE = -1;
+  public const FINAL_SCORE_NEEDS_CLEANUP = 0;
 
-  public function __construct() {
-    $this->deleteLogfile();
-  }
+  private const SCORE_NEUTRAL = 0;
+  private const SCORE_GOOD = 10;
+  private const SCORE_VERY_GOOD = 50;
+  private const SCORE_BAD = -10;
+  private const SCORE_VERY_BAD = -500;
 
-  public function isValidContact($contact) {
+  public function getValidationRating($contact) {
     $rating = [];
 
     $this->hasDisplayName($contact, $rating);
@@ -27,30 +30,25 @@ class SourceContactValidator {
     $this->isGroupMemberKeepMeInformed($contact, $rating);
 
     $this->calculateScore($rating);
-    if ($rating['score'] > 0) {
-      $this->logContact($contact, $rating); // tijdelijk tot we drempel bepaald hebben
-      return TRUE;
-    }
-    else {
-      $this->logContact($contact, $rating);
-    }
+
+    return $rating;
   }
 
   private function hasDisplayName($contact, &$rating) {
     if (trim($contact['display_name'])) {
-      $rating['heeft naam'] = 1;
+      $rating['heeft naam'] = self::SCORE_NEUTRAL;
     }
     else {
-      $rating['heeft naam'] = 0;
+      $rating['heeft naam'] = self::SCORE_VERY_BAD;
     }
   }
 
   private function isIndividualOrOrganization($contact, &$rating) {
     if ($contact['contact_type'] == 'Individual' || $contact['contact_type'] == 'Organization') {
-      $rating['is persoon of organisatie'] = 1;
+      $rating['is persoon of organisatie'] = self::SCORE_NEUTRAL;
     }
     else {
-      $rating['is persoon of organisatie'] = 0;
+      $rating['is persoon of organisatie'] = self::SCORE_VERY_BAD;
     }
   }
 
@@ -75,29 +73,29 @@ class SourceContactValidator {
     ]);
     $numOfRelationships = $dao->fetchColumn();
     if ($numOfRelationships) {
-      $rating['heeft actieve relaties'] = 1;
+      $rating['heeft actieve relaties'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft actieve relaties'] = 0;
+      $rating['heeft actieve relaties'] = self::SCORE_NEUTRAL;
     }
   }
 
   private function isNotSpam($contact, &$rating) {
     if (strpos($contact['display_name'], '@ssemarketing.net') > 0) {
-      $rating['is geen spam'] = 0;
+      $rating['is spam'] = self::SCORE_VERY_BAD;
     }
     else {
-      $rating['is geen spam'] = 1;
+      $rating['is spam'] = self::SCORE_NEUTRAL;
     }
   }
 
   private function hasActiveLogin($contact, &$rating) {
     $drupalId = $this->getDrupalIdFromUfMatch($contact['id']);
     if ($drupalId) {
-      $rating['heeft Drupal login'] = 1;
+      $rating['heeft Drupal login'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft Drupal login'] = 0;
+      $rating['heeft Drupal login'] = self::SCORE_NEUTRAL;
     }
 
     $this->isActiveDrupalUser($drupalId, $rating);
@@ -136,10 +134,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $id = $dao->fetchColumn();
     if ($id) {
-      $rating['heeft postadres'] = 1;
+      $rating['heeft postadres'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft postadres'] = 0;
+      $rating['heeft postadres'] = self::SCORE_NEUTRAL;
     }
   }
 
@@ -159,10 +157,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $id = $dao->fetchColumn();
     if ($id) {
-      $rating['heeft telefoonnummer'] = 1;
+      $rating['heeft telefoonnummer'] = self::SCORE_GOOD;
     }
     else {
-      $rating['heeft telefoonnummer'] = 0;
+      $rating['heeft telefoonnummer'] = self::SCORE_NEUTRAL;
     }
   }
 
@@ -184,14 +182,14 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $row = $dao->fetch();
     if ($row) {
-      $rating['heeft e-mailadres'] = 1;
-      $rating['e-mail is niet on-hold'] = $row['on_hold'] == 1 ? 0 : 1;
-      $rating['e-mail is uniek'] = $this->isUniqueEmailAddress($row['email']);
+      $rating['heeft e-mailadres'] = self::SCORE_VERY_GOOD;
+      $rating['e-mail on-hold'] = $row['on_hold'] == 1 ? self::SCORE_BAD : self::SCORE_NEUTRAL;
+      $rating['e-mail is uniek'] = $this->isUniqueEmailAddress($row['email']) ? self::SCORE_GOOD : self::SCORE_BAD;
     }
     else {
-      $rating['heeft e-mailadres'] = 0;
-      $rating['e-mail is niet on-hold'] = 0;
-      $rating['e-mail is uniek'] = 0;
+      $rating['heeft e-mailadres'] = self::SCORE_BAD;
+      $rating['e-mail on-hold'] = self::SCORE_NEUTRAL;
+      $rating['e-mail is uniek'] = self::SCORE_NEUTRAL;
     }
   }
 
@@ -219,10 +217,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $emailCount = $dao->fetchColumn();
     if ($emailCount) {
-      return 0;
+      return FALSE;
     }
     else {
-      return 1;
+      return TRUE;
     }
   }
 
@@ -248,10 +246,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['heeft recente activiteiten'] = 1;
+      $rating['heeft recente activiteiten'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft recente activiteiten'] = 0;
+      $rating['heeft recente activiteiten'] = self::SCORE_NEUTRAL;
     }
   }
 
@@ -273,30 +271,30 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['heeft recent deelgenomen aan evenementen'] = 1;
+      $rating['heeft recent deelgenomen aan evenementen'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft recent deelgenomen aan evenementen'] = 0;
+      $rating['heeft recent deelgenomen aan evenementen'] = self::SCORE_NEUTRAL;
     }
   }
 
   private function isActiveDrupalUser($drupalId, $rating) {
     if ($drupalId) {
       // TODO: query users table
-      $rating['heeft actief Drupal account'] = 1;
+      $rating['heeft actief Drupal account'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['heeft actief Drupal account'] = 0;
+      $rating['heeft actief Drupal account'] = self::SCORE_NEUTRAL;
     }
 
   }
 
   private function hasOptedOut($contact, &$rating) {
     if ($contact['is_opt_out'] == 1) {
-      $rating['is niet opt-out'] = 1;
+      $rating['is opt-out'] = self::SCORE_VERY_BAD;
     }
     else {
-      $rating['is niet opt-out'] = 0;
+      $rating['is opt-out'] = self::SCORE_GOOD;
     }
   }
 
@@ -322,62 +320,30 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['lid van groep Hou mij op de hoogte'] = 1;
+      $rating['lid van groep Hou mij op de hoogte'] = self::SCORE_VERY_GOOD;
     }
     else {
-      $rating['lid van groep Hou mij op de hoogte'] = 0;
+      $rating['lid van groep Hou mij op de hoogte'] = self::SCORE_NEUTRAL;
     }
   }
 
   private function calculateScore(&$rating) {
-    $score = 0;
+    $absoluteScore = 0;
 
     foreach ($rating as $k => $v) {
-      $score += $v;
+      $absoluteScore += $v;
     }
 
-    $rating['score'] = $score;
-  }
+    $rating['absolute_score'] = $absoluteScore;
 
-  private function deleteLogFile() {
-    if (file_exists(self::LOG_FILE)) {
-      unlink(self::LOG_FILE);
+    if ($absoluteScore < self::SCORE_NEUTRAL) {
+      $rating['score'] = self::FINAL_SCORE_DO_NOT_MIGRATE;
     }
-  }
-
-  private function createLogFile($rating) {
-    $header = [
-      'Contact Id',
-      'Display Name',
-      'Contact Type'
-    ];
-
-    foreach ($rating as $k => $v) {
-      $header[] = $k;
+    elseif ($absoluteScore >= self::SCORE_NEUTRAL and $absoluteScore <= self::SCORE_VERY_GOOD) {
+      $rating['score'] = self::FINAL_SCORE_NEEDS_CLEANUP;
     }
-
-    $tabSeparatedColumnNames = implode("\t", $header) . "\n";
-    file_put_contents(self::LOG_FILE, $tabSeparatedColumnNames);
-
-    $this->logFileCreated = TRUE;
-  }
-
-  private function logContact($contact, $rating) {
-    if ($this->logFileCreated == FALSE) {
-      $this->createLogFile($rating);
+    else {
+      $rating['score'] = self::FINAL_SCORE_MIGRATE;
     }
-
-    $row = [
-      $contact['id'],
-      $contact['display_name'],
-      $contact['contact_type'],
-    ];
-
-    foreach ($rating as $k => $v) {
-      $row[] = $v;
-    }
-
-    $tabSeparatedRow = implode("\t", $row) . "\n";
-    file_put_contents(self::LOG_FILE, $tabSeparatedRow, FILE_APPEND);
   }
 }

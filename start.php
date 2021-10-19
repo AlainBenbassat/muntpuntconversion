@@ -9,8 +9,10 @@ function main() {
     loadClasses();
     bootstrapCiviCRM();
 
-    $convertor = new Muntpuntconversion\Convertor();
-    $convertor->start();
+    $scoreGenerator = new \Muntpuntconversion\SourceContactScoreGenerator();
+    $scoreGenerator->start();
+    //$convertor = new Muntpuntconversion\Convertor();
+    //$convertor->start();
   }
   catch (Exception $e) {
     echo "==============================================\n\n";
