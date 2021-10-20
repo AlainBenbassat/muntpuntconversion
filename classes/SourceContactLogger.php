@@ -1,12 +1,10 @@
 <?php
 
-namespace Muntpuntconversion;
-
 class SourceContactLogger {
   private const LOG_FILE_MIGRATE = __DIR__ . '/../valid_contacts.csv';
   private const LOG_FILE_DO_NOT_MIGRATE = __DIR__ . '/../invalid_contacts.csv';
   private const LOG_FILE_NEEDS_CLEANUP = __DIR__ . '/../verify_contacts.csv';
-  private const LOG_TABLE = 'migration_contacts';
+  public const LOG_TABLE = 'migration_contacts';
 
   public function __construct($reset = FALSE) {
     if ($reset) {
@@ -19,7 +17,7 @@ class SourceContactLogger {
   }
 
   public function printStats() {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE . ' where  score = ' . SourceContactValidator::FINAL_SCORE_MIGRATE);
     $numMigrate = $score->fetch()['score_count'];
@@ -52,8 +50,8 @@ class SourceContactLogger {
   }
 
   private function clearLogTable() {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
-    $pdo->query('drop table ' . self::LOG_TABLE);
+    $pdo = SourceDB::getPDO();
+    $pdo->query('drop table if exists ' . self::LOG_TABLE);
   }
 
   private function createLogTable($rating) {
@@ -74,7 +72,7 @@ class SourceContactLogger {
 
     $sql .= ') ENGINE=InnoDB';
 
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
     $pdo->query($sql);
 
     // add index on email
@@ -128,7 +126,7 @@ class SourceContactLogger {
       $colPlaceHolders[] = '?';
     }
 
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
     $sql = 'insert into ' . self::LOG_TABLE . '(' . implode(',', $colNames) . ') values (' . implode(',', $colPlaceHolders) . ');';
     $stmt= $pdo->prepare($sql);
     $stmt->execute($colValues);

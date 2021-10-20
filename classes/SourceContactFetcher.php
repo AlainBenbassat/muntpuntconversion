@@ -1,16 +1,9 @@
 <?php
 
-namespace Muntpuntconversion;
-
 class SourceContactFetcher {
-  private $onlyValidContacts = FALSE;
 
-  public function __construct($onlyValidContacts = FALSE) {
-    $this->onlyValidContacts = $onlyValidContacts;
-  }
-
-  public function getBatch($startingContactId = 0, $numberOfContacts = 300) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+  public function getBatchAllContacts($startingContactId = 0, $numberOfContacts = 300) {
+    $pdo = SourceDB::getPDO();
 
     $sql = "
       SELECT
@@ -31,8 +24,32 @@ class SourceContactFetcher {
     return $dao;
   }
 
+  public function getBatchOnlyValidContacts($startingContactId = 0, $numberOfContacts = 300) {
+    $pdo = SourceDB::getPDO();
+
+    $tableName = SourceContactLogger::LOG_TABLE;
+    $score = SourceContactValidator::FINAL_SCORE_MIGRATE;
+    $sql = "
+      SELECT
+        id
+      FROM
+        $tableName
+      where
+        id > $startingContactId
+      and
+        score = $score
+      order by
+        id
+      limit
+        0,$numberOfContacts
+    ";
+    $dao = $pdo->query($sql);
+
+    return $dao;
+  }
+
   public function getContact($contactId) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $sql = "
       SELECT

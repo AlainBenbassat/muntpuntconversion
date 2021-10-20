@@ -1,9 +1,5 @@
 <?php
 
-namespace Muntpuntconversion;
-
-use PDO;
-
 class SourceDB {
   private static $instance = null;
 

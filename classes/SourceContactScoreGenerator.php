@@ -1,7 +1,5 @@
 <?php
 
-namespace Muntpuntconversion;
-
 /**
  * Loops over all source contacts put them in one of these 3 categories:
  *   - migrate (i.e. quaulity of the data is good)
@@ -16,7 +14,7 @@ class SourceContactScoreGenerator {
     $contactValidator = new SourceContactValidator();
     $scoreLogger = new SourceContactLogger(TRUE);
 
-    $dao = $contactFetcher->getBatch(0, self::BATCH_LIMIT);
+    $dao = $contactFetcher->getBatchAllContacts(0, self::BATCH_LIMIT);
     while ($row = $dao->fetch()) {
       $contact = $contactFetcher->getContact($row['id']);
       $rating = $contactValidator->getValidationRating($contact);

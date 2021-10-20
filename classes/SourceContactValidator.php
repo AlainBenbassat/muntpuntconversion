@@ -1,7 +1,5 @@
 <?php
 
-namespace Muntpuntconversion;
-
 class SourceContactValidator {
   public const FINAL_SCORE_MIGRATE = 1;
   public const FINAL_SCORE_DO_NOT_MIGRATE = -1;
@@ -53,7 +51,7 @@ class SourceContactValidator {
   }
 
   private function hasActiveRelationships($contact, &$rating) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $sql = "
       select
@@ -102,7 +100,7 @@ class SourceContactValidator {
   }
 
   private function getDrupalIdFromUfMatch($contactId) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $sql = "
       select
@@ -119,7 +117,7 @@ class SourceContactValidator {
   }
 
   private function hasPostalAddress($contact, &$rating) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $contactId = $contact['id'];
     $sql = "
@@ -142,7 +140,7 @@ class SourceContactValidator {
   }
 
   private function hasPhoneNumber($contact, &$rating) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $contactId = $contact['id'];
     $sql = "
@@ -165,7 +163,7 @@ class SourceContactValidator {
   }
 
   private function hasEmailAddress($contact, &$rating) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $contactId = $contact['id'];
     $sql = "
@@ -196,7 +194,7 @@ class SourceContactValidator {
   }
 
   private function isUniqueEmailAddress($email) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $quotedEmail = $pdo->quote($email);
     $sql = "
@@ -227,7 +225,7 @@ class SourceContactValidator {
   }
 
   private function hasRecentActivities($contact, &$rating) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $contactId = $contact['id'];
     $sql = "
@@ -256,7 +254,7 @@ class SourceContactValidator {
   }
 
   private function hasRecentEventRegistrations($contact, &$rating) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $contactId = $contact['id'];
     $sql = "
@@ -280,9 +278,29 @@ class SourceContactValidator {
     }
   }
 
-  private function isActiveDrupalUser($drupalId, $rating) {
+  private function isActiveDrupalUser($drupalId, &$rating) {
+    $pdo = SourceDB::getPDO();
+
     if ($drupalId) {
-      // TODO: query users table
+      $sql = "
+        select
+          uid
+        from
+          users
+        where
+          uid = $drupalId
+        and
+          status = 1
+      ";
+
+      $dao = $pdo->query($sql);
+      $uid = $dao->fetchColumn();
+    }
+    else {
+      $uid = 0;
+    }
+
+    if ($uid) {
       $rating['heeft_actief_Drupal_account'] = self::SCORE_VERY_GOOD;
     }
     else {
@@ -301,7 +319,7 @@ class SourceContactValidator {
   }
 
   private function isGroupMemberKeepMeInformed($contact, &$rating) {
-    $pdo = \Muntpuntconversion\SourceDB::getPDO();
+    $pdo = SourceDB::getPDO();
 
     $contactId = $contact['id'];
     $sql = "
