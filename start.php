@@ -11,13 +11,11 @@ function main() {
 
     // Step 1: prepare contact list
     $scoreGenerator = new SourceContactScoreGenerator();
-    $scoreGenerator->start();
+    //$scoreGenerator->start();
 
     // Step 2: convert (i.e. migrate contact)
     $convertor = new Convertor();
     $convertor->start();
-    $x = new TargetEmail();
-    $x->test();
   }
   catch (Exception $e) {
     echo "==============================================\n\n";
