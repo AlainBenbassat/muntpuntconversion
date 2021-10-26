@@ -1,18 +1,11 @@
 <?php
 
 class SourceContactLogger {
-  private const LOG_FILE_MIGRATE = __DIR__ . '/../valid_contacts.csv';
-  private const LOG_FILE_DO_NOT_MIGRATE = __DIR__ . '/../invalid_contacts.csv';
-  private const LOG_FILE_NEEDS_CLEANUP = __DIR__ . '/../verify_contacts.csv';
   public const LOG_TABLE = 'migration_contacts';
 
   public function __construct($reset = FALSE) {
     if ($reset) {
       $this->clearLogTable();
-
-      $this->deleteLogFile(self::LOG_FILE_MIGRATE);
-      $this->deleteLogFile(self::LOG_FILE_DO_NOT_MIGRATE);
-      $this->deleteLogFile(self::LOG_FILE_NEEDS_CLEANUP);
     }
   }
 
@@ -43,12 +36,6 @@ class SourceContactLogger {
     // OP BASIS VAN TABEL DE CSV's genereren
   }
 
-  private function deleteLogFile($fileName) {
-    if (file_exists($fileName)) {
-      unlink($fileName);
-    }
-  }
-
   private function clearLogTable() {
     $pdo = SourceDB::getPDO();
     $pdo->query('drop table if exists ' . self::LOG_TABLE);
@@ -65,7 +52,7 @@ class SourceContactLogger {
     ";
 
     foreach ($rating as $k => $v) {
-      if ($k != 'email') {
+      if ($k != 'email' && $k != 'contact_type') {
         $sql .= ", $k int(5)";
       }
     }
@@ -79,22 +66,6 @@ class SourceContactLogger {
     $pdo->query('CREATE INDEX em_' . self::LOG_TABLE . ' ON ' . self::LOG_TABLE . ' (email, id); ');
   }
 
-  private function createLogFile($fileName, $rating) {
-    die('KLOPT NIET');
-    $header = [
-      'Contact Id',
-      'Display Name',
-      'Contact Type'
-    ];
-
-    foreach ($rating as $k => $v) {
-      $header[] = $k;
-    }
-
-    $tabSeparatedColumnNames = implode("\t", $header) . "\n";
-    file_put_contents($fileName, $tabSeparatedColumnNames);
-  }
-
   public function logContact($contact, $rating) {
     static $log_table_created = FALSE;
 
@@ -106,7 +77,6 @@ class SourceContactLogger {
     $colNames = [
       'id',
       'display_name',
-      'contact_type',
     ];
     $colPlaceHolders = [
       '?',
@@ -117,7 +87,6 @@ class SourceContactLogger {
     $colValues = [
       $contact['id'],
       $contact['display_name'],
-      $contact['contact_type'],
     ];
 
     foreach ($rating as $k => $v) {

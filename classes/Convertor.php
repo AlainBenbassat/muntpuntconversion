@@ -1,14 +1,18 @@
 <?php
 
 class Convertor {
-  private const BATCH_LIMIT = 200;
+  private $batchLimit;
+
+  public function __construct($batchLimit = 200) {
+    $this->batchLimit = $batchLimit;
+  }
 
   public function start() {
     $contactFetcher = new SourceContactFetcher();
     $targetContact = new TargetContact();
     $targetAddress = new TargetAddress();
 
-    $dao = $contactFetcher->getBatchOnlyValidContacts(0, self::BATCH_LIMIT);
+    $dao = $contactFetcher->getBatchOnlyValidContacts(0, $this->batchLimit);
     while ($scoredContactInfo = $dao->fetch()) {
       $contact = $contactFetcher->getContact($scoredContactInfo['id']);
 

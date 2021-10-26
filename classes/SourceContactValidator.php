@@ -5,19 +5,14 @@ class SourceContactValidator {
   public const FINAL_SCORE_DO_NOT_MIGRATE = -1;
   public const FINAL_SCORE_NEEDS_CLEANUP = 0;
 
-  private const SCORE_NEUTRAL = 0;
-  private const SCORE_GOOD = 10;
-  private const SCORE_VERY_GOOD = 50;
-  private const SCORE_BAD = -10;
-  private const SCORE_VERY_BAD = -500;
-
   public function getValidationRating($contact) {
     $rating = [];
 
     $this->hasDisplayName($contact, $rating);
     $this->isIndividualOrOrganization($contact, $rating);
+    $this->isContactSubTypePers($contact, $rating);
     $this->hasActiveRelationships($contact, $rating);
-    $this->isNotSpam($contact, $rating);
+    $this->isSpam($contact, $rating);
     $this->hasActiveLogin($contact, $rating);
     $this->hasPostalAddress($contact, $rating);
     $this->hasPhoneNumber($contact, $rating);
@@ -26,6 +21,7 @@ class SourceContactValidator {
     $this->hasRecentEventRegistrations($contact,$rating);
     $this->hasOptedOut($contact, $rating);
     $this->isGroupMemberKeepMeInformed($contact, $rating);
+    $this->isGroupMemberUitDienst($contact, $rating);
 
     $this->calculateScore($rating);
 
@@ -34,19 +30,30 @@ class SourceContactValidator {
 
   private function hasDisplayName($contact, &$rating) {
     if (trim($contact['display_name'])) {
-      $rating['heeft_naam'] = self::SCORE_NEUTRAL;
+      $rating['heeft_naam'] = 1;
     }
     else {
-      $rating['heeft_naam'] = self::SCORE_VERY_BAD;
+      $rating['heeft_naam'] = 0;
     }
   }
 
   private function isIndividualOrOrganization($contact, &$rating) {
+    $rating['contact_type'] = $contact['contact_type'];
+
     if ($contact['contact_type'] == 'Individual' || $contact['contact_type'] == 'Organization') {
-      $rating['is_persoon_of_organisatie'] = self::SCORE_NEUTRAL;
+      $rating['is_persoon_of_organisatie'] = 1;
     }
     else {
-      $rating['is_persoon_of_organisatie'] = self::SCORE_VERY_BAD;
+      $rating['is_persoon_of_organisatie'] = 0;
+    }
+  }
+
+  private function isContactSubTypePers($contact, &$rating) {
+    if (strpos($contact['contact_sub_type'], 'Pers_Medewerker') === FALSE) {
+      $rating['is_pers_medewerker'] = 0;
+    }
+    else {
+      $rating['is_pers_medewerker'] = 1;
     }
   }
 
@@ -71,29 +78,29 @@ class SourceContactValidator {
     ]);
     $numOfRelationships = $dao->fetchColumn();
     if ($numOfRelationships) {
-      $rating['heeft_actieve_relaties'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_actieve_relaties'] = 1;
     }
     else {
-      $rating['heeft_actieve_relaties'] = self::SCORE_NEUTRAL;
+      $rating['heeft_actieve_relaties'] = 0;
     }
   }
 
-  private function isNotSpam($contact, &$rating) {
+  private function isSpam($contact, &$rating) {
     if (strpos($contact['display_name'], '@ssemarketing.net') > 0) {
-      $rating['is_spam'] = self::SCORE_VERY_BAD;
+      $rating['is_spam'] = 1;
     }
     else {
-      $rating['is_spam'] = self::SCORE_NEUTRAL;
+      $rating['is_spam'] = 0;
     }
   }
 
   private function hasActiveLogin($contact, &$rating) {
     $drupalId = $this->getDrupalIdFromUfMatch($contact['id']);
     if ($drupalId) {
-      $rating['heeft_Drupal_login'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_Drupal_login'] = 1;
     }
     else {
-      $rating['heeft_Drupal_login'] = self::SCORE_NEUTRAL;
+      $rating['heeft_Drupal_login'] = 0;
     }
 
     $this->isActiveDrupalUser($drupalId, $rating);
@@ -132,10 +139,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $id = $dao->fetchColumn();
     if ($id) {
-      $rating['heeft_postadres'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_postadres'] = 1;
     }
     else {
-      $rating['heeft_postadres'] = self::SCORE_NEUTRAL;
+      $rating['heeft_postadres'] = 0;
     }
   }
 
@@ -155,10 +162,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $id = $dao->fetchColumn();
     if ($id) {
-      $rating['heeft_telefoonnummer'] = self::SCORE_GOOD;
+      $rating['heeft_telefoonnummer'] = 1;
     }
     else {
-      $rating['heeft_telefoonnummer'] = self::SCORE_NEUTRAL;
+      $rating['heeft_telefoonnummer'] = 0;
     }
   }
 
@@ -181,15 +188,15 @@ class SourceContactValidator {
     $row = $dao->fetch();
     if ($row) {
       $rating['email'] = $row['email'];
-      $rating['heeft_emailadres'] = self::SCORE_VERY_GOOD;
-      $rating['email_onhold'] = $row['on_hold'] == 1 ? self::SCORE_BAD : self::SCORE_NEUTRAL;
-      $rating['email_is_uniek'] = $this->isUniqueEmailAddress($row['email']) ? self::SCORE_GOOD : self::SCORE_BAD;
+      $rating['heeft_emailadres'] = 1;
+      $rating['email_onhold'] = $row['on_hold'] == 1 ? 1 : 0;
+      $rating['email_is_uniek'] = $this->isUniqueEmailAddress($row['email']) ? 1 : 0;
     }
     else {
       $rating['email'] = '';
-      $rating['heeft_emailadres'] = self::SCORE_BAD;
-      $rating['email_onhold'] = self::SCORE_NEUTRAL;
-      $rating['email_is_uniek'] = self::SCORE_NEUTRAL;
+      $rating['heeft_emailadres'] = 0;
+      $rating['email_onhold'] = 0;
+      $rating['email_is_uniek'] = 0;
     }
   }
 
@@ -227,6 +234,8 @@ class SourceContactValidator {
   private function hasRecentActivities($contact, &$rating) {
     $pdo = SourceDB::getPDO();
 
+    $cutOffDate = $contact['contact_type'] == 'Individual' ? '2019-11-01' : '2016-11-01';
+
     $contactId = $contact['id'];
     $sql = "
       select
@@ -240,16 +249,16 @@ class SourceContactValidator {
       and
         a.is_deleted = 0
       and
-        a.activity_date_time >= '2019-01-01'
+        a.activity_date_time >= '$cutOffDate'
     ";
 
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['heeft_recente_activiteiten'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_recente_activiteiten'] = 1;
     }
     else {
-      $rating['heeft_recente_activiteiten'] = self::SCORE_NEUTRAL;
+      $rating['heeft_recente_activiteiten'] = 0;
     }
   }
 
@@ -271,10 +280,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['heeft_recent_deelgenomen_aan_evenementen'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_recent_deelgenomen_aan_evenementen'] = 1;
     }
     else {
-      $rating['heeft_recent_deelgenomen_aan_evenementen'] = self::SCORE_NEUTRAL;
+      $rating['heeft_recent_deelgenomen_aan_evenementen'] = 0;
     }
   }
 
@@ -301,20 +310,20 @@ class SourceContactValidator {
     }
 
     if ($uid) {
-      $rating['heeft_actief_Drupal_account'] = self::SCORE_VERY_GOOD;
+      $rating['heeft_actief_Drupal_account'] = 1;
     }
     else {
-      $rating['heeft_actief_Drupal_account'] = self::SCORE_NEUTRAL;
+      $rating['heeft_actief_Drupal_account'] = 0;
     }
 
   }
 
   private function hasOptedOut($contact, &$rating) {
     if ($contact['is_opt_out'] == 1) {
-      $rating['is_optout'] = self::SCORE_VERY_BAD;
+      $rating['is_optout'] = 1;
     }
     else {
-      $rating['is_optout'] = self::SCORE_GOOD;
+      $rating['is_optout'] = 0;
     }
   }
 
@@ -340,30 +349,84 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['lid_van_groep_hou_mij_op_de_hoogte'] = self::SCORE_VERY_GOOD;
+      $rating['lid_van_groep_hou_mij_op_de_hoogte'] = 1;
     }
     else {
-      $rating['lid_van_groep_hou_mij_op_de_hoogte'] = self::SCORE_NEUTRAL;
+      $rating['lid_van_groep_hou_mij_op_de_hoogte'] = 0;
+    }
+  }
+
+  private function isGroupMemberUitDienst($contact, &$rating) {
+    $pdo = SourceDB::getPDO();
+
+    $contactId = $contact['id'];
+    $sql = "
+      select
+        count(gc.id)
+      from
+        civicrm_group_contact gc
+      inner join
+        civicrm_group g on g.id = gc.group_id
+      WHERE
+        gc.status = 'Added'
+      and
+        g.title = 'Muntpunt medewerkers uit dienst'
+      and
+        gc.contact_id = $contactId
+    ";
+
+    $dao = $pdo->query($sql);
+    $activityCount = $dao->fetchColumn();
+    if ($activityCount) {
+      $rating['lid_van_groep_uit_dienst'] = 1;
+    }
+    else {
+      $rating['lid_van_groep_uit_dienst'] = 0;
     }
   }
 
   private function calculateScore(&$rating) {
-    $absoluteScore = 0;
-
-    foreach ($rating as $k => $v) {
-      $absoluteScore += $v;
+    if ($rating['contact_type'] == 'Individual') {
+      $this->calculateScoreIndividual($rating);
     }
-
-    $rating['absolute_score'] = $absoluteScore;
-
-    if ($absoluteScore < self::SCORE_NEUTRAL) {
-      $rating['score'] = self::FINAL_SCORE_DO_NOT_MIGRATE;
-    }
-    elseif ($absoluteScore >= self::SCORE_NEUTRAL and $absoluteScore <= self::SCORE_VERY_GOOD) {
-      $rating['score'] = self::FINAL_SCORE_NEEDS_CLEANUP;
+    elseif ($rating['contact_type'] == 'Organization') {
+      $this->calculateScoreOrganization($rating);
     }
     else {
+      $rating['score'] = self::FINAL_SCORE_DO_NOT_MIGRATE;
+    }
+  }
+
+  private function calculateScoreIndividual(&$rating) {
+    $rating['score'] = self::FINAL_SCORE_DO_NOT_MIGRATE;
+
+    if ($rating['heeft_emailadres'] == 0) {
+      return;
+    }
+
+    if ($rating['email_onhold'] == 1) {
+      return;
+    }
+
+    if ($rating['is_spam'] == 1) {
+      return;
+    }
+
+    if ($rating['is_optout'] == 1) {
+      return;
+    }
+
+    // we keep this contact
+    if ($rating['heeft_recente_activiteiten'] == 1
+      || $rating['lid_van_groep_hou_mij_op_de_hoogte'] == 1
+      || $rating['lid_van_groep_uit_dienst'] == 1
+      || $rating['is_pers_medewerker'] == 1
+    ) {
       $rating['score'] = self::FINAL_SCORE_MIGRATE;
     }
+  }
+
+  private function calculateScoreOrganization(&$rating) {
+
   }
 }

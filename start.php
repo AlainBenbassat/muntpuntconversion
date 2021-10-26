@@ -4,24 +4,29 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-function main() {
+function main($task) {
+  $BATCH_LIMIT = 200;
+
   try {
     loadClasses();
     bootstrapCiviCRM();
 
-    // Step 1: prepare contact list
-    $scoreGenerator = new SourceContactScoreGenerator();
-    //$scoreGenerator->start();
-
-    // Step 2: convert (i.e. migrate contact)
-    $convertor = new Convertor();
-    $convertor->start();
+    if ($task == 'score') {
+      $scoreGenerator = new SourceContactScoreGenerator($BATCH_LIMIT);
+      $scoreGenerator->start();
+    }
+    elseif ($task == 'convert') {
+      $convertor = new Convertor($BATCH_LIMIT);
+      $convertor->start();
+    }
   }
   catch (Exception $e) {
     echo "==============================================\n\n";
     echo 'ERROR: ' . $e->getMessage();
     echo "\n\n";
   }
+
+  echo "\nDone.\n";
 }
 
 function bootstrapCiviCRM() {
@@ -47,4 +52,26 @@ function loadClasses() {
   }
 }
 
-main();
+function getTask() {
+  global $argv;
+
+  if (count($argv) > 1) {
+    if ($argv[1] == 'score') {
+      return $argv[1];
+    }
+    elseif ($argv[1] == 'convert') {
+      return $argv[1];
+    }
+    else {
+      echo "Please specify a task: {score|convert}\n";
+      exit(1);
+    }
+  }
+  else {
+    echo "Please specify a task: {score|convert}\n";
+    exit(1);
+  }
+}
+
+$task = getTask();
+main($task);

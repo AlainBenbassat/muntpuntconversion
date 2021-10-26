@@ -7,14 +7,18 @@
  *   - needs (manual) cleanup (i.e. because it's a duplicate...)
  */
 class SourceContactScoreGenerator {
-  private const BATCH_LIMIT = 200;
+  private $batchLimit;
+
+  public function __construct($batchLimit = 200) {
+    $this->batchLimit = $batchLimit;
+  }
 
   public function start() {
     $contactFetcher = new SourceContactFetcher();
     $contactValidator = new SourceContactValidator();
     $scoreLogger = new SourceContactLogger(TRUE);
 
-    $dao = $contactFetcher->getBatchAllContacts(0, self::BATCH_LIMIT);
+    $dao = $contactFetcher->getBatchAllContacts(0, $this->batchLimit);
     while ($row = $dao->fetch()) {
       $contact = $contactFetcher->getContact($row['id']);
       $rating = $contactValidator->getValidationRating($contact);
