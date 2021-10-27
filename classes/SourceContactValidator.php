@@ -2,8 +2,7 @@
 
 class SourceContactValidator {
   public const FINAL_SCORE_MIGRATE = 1;
-  public const FINAL_SCORE_DO_NOT_MIGRATE = -1;
-  public const FINAL_SCORE_NEEDS_CLEANUP = 0;
+  public const FINAL_SCORE_DO_NOT_MIGRATE = 0;
 
   public function getValidationRating($contact) {
     $rating = [];
@@ -22,6 +21,7 @@ class SourceContactValidator {
     $this->hasOptedOut($contact, $rating);
     $this->isGroupMemberKeepMeInformed($contact, $rating);
     $this->isGroupMemberUitDienst($contact, $rating);
+    $this->isEventPartner($contact, $rating);
 
     $this->calculateScore($rating);
 
@@ -191,12 +191,20 @@ class SourceContactValidator {
       $rating['heeft_emailadres'] = 1;
       $rating['email_onhold'] = $row['on_hold'] == 1 ? 1 : 0;
       $rating['email_is_uniek'] = $this->isUniqueEmailAddress($row['email']) ? 1 : 0;
+
+      if (trim($contact['display_name']) == '' || trim($contact['display_name']) == trim($row['email'])) {
+        $rating['display_name_is_email'] =  1;
+      }
+      else {
+        $rating['display_name_is_email'] =  0;
+      }
     }
     else {
       $rating['email'] = '';
       $rating['heeft_emailadres'] = 0;
       $rating['email_onhold'] = 0;
       $rating['email_is_uniek'] = 0;
+      $rating['display_name_is_email'] = 0;
     }
   }
 
@@ -385,6 +393,39 @@ class SourceContactValidator {
     }
   }
 
+  private function isEventPartner($contact, &$rating) {
+    if ($contact['contact_type'] == 'Individual') {
+      $rating['is_evenement_partner'] = 0;
+    }
+
+    $pdo = SourceDB::getPDO();
+
+    $contactId = $contact['id'];
+    $sql = "
+      select
+        count(id)
+      from
+        civicrm_value_private_event_info_115
+      where
+        partner_1_331 = $contactId
+      or
+        partner_2__333 = $contactId
+      or
+        partner_3__339 = $contactId
+      or
+        partner_4__337 = $contactId
+    ";
+
+    $dao = $pdo->query($sql);
+    $activityCount = $dao->fetchColumn();
+    if ($activityCount) {
+      $rating['is_evenement_partner'] = 1;
+    }
+    else {
+      $rating['is_evenement_partner'] = 0;
+    }
+  }
+
   private function calculateScore(&$rating) {
     if ($rating['contact_type'] == 'Individual') {
       $this->calculateScoreIndividual($rating);
@@ -427,6 +468,17 @@ class SourceContactValidator {
   }
 
   private function calculateScoreOrganization(&$rating) {
+    $rating['score'] = self::FINAL_SCORE_DO_NOT_MIGRATE;
 
+    if ($rating['heeft_naam'] == 0) {
+      return;
+    }
+
+    // we keep this contact
+    if ($rating['heeft_recente_activiteiten'] == 1
+      || $rating['is_evenement_partner'] == 1
+    ) {
+      $rating['score'] = self::FINAL_SCORE_MIGRATE;
+    }
   }
 }

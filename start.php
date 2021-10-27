@@ -5,7 +5,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 function main($task) {
-  $BATCH_LIMIT = 200;
+  $BATCH_LIMIT = 2000000;
 
   try {
     loadClasses();
@@ -21,8 +21,10 @@ function main($task) {
     }
   }
   catch (Exception $e) {
+    echo "==============================================\n";
+    echo 'ERROR in ' . $e->getFile() . ', line ' . $e->getLine() . ":\n";
+    echo  $e->getMessage() . "\n";
     echo "==============================================\n\n";
-    echo 'ERROR: ' . $e->getMessage();
     echo "\n\n";
   }
 

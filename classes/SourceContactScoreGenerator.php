@@ -26,6 +26,7 @@ class SourceContactScoreGenerator {
       $scoreLogger->logContact($contact, $rating);
     }
 
+    $scoreLogger->resolveDuplicates();
     $scoreLogger->printStats();
   }
 }
