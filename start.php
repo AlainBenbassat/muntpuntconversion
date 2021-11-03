@@ -13,9 +13,13 @@ function main($task) {
 
     if ($task == 'score') {
       $scoreGenerator = new SourceContactScoreGenerator($BATCH_LIMIT);
-      $scoreGenerator->validateAllContacts();
-      $scoreGenerator->resolveDuplicates();
-      $scoreGenerator->printStats();
+      //$scoreGenerator->validateAllContacts();
+
+      $duplicateFinder = new SourceContactDuplicateFinder();
+      //$duplicateFinder->markMainContacts();
+
+      $logger = new SourceContactLogger(FALSE);
+      $logger->printStats();
     }
     elseif ($task == 'convert') {
       $convertor = new Convertor($BATCH_LIMIT);

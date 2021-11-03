@@ -26,14 +26,4 @@ class SourceContactScoreGenerator {
       $scoreLogger->logContact($contact, $rating);
     }
   }
-
-  public function resolveDuplicates() {
-    $scoreLogger = new SourceContactLogger(FALSE);
-    $scoreLogger->resolveDuplicates();
-  }
-
-  public function printStats() {
-    $scoreLogger = new SourceContactLogger(FALSE);
-    $scoreLogger->printStats();
-  }
 }
