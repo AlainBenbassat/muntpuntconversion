@@ -1,24 +1,20 @@
 <?php
 
 class SourceContactLogger {
-  public const LOG_TABLE = 'migration_contacts';
-
-  public function __construct($reset = FALSE) {
-    if ($reset) {
-      $this->clearLogTable();
-    }
-  }
+  public const LOG_TABLE_CONTACTS = 'migration_contacts';
+  public const LOG_TABLE_MC_GROUPS = 'migration_mailchimp_groups';
+  public const LOG_TABLE_MC_GROUP_CONTACTS = 'migration_mailchimp_group_contacts';
 
   public function printStats() {
     $pdo = SourceDB::getPDO();
 
-    $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE . ' where  score = ' . SourceContactValidator::FINAL_SCORE_MIGRATE);
+    $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE_CONTACTS . ' where  score = ' . SourceContactValidator::FINAL_SCORE_MIGRATE);
     $numMigrate = $score->fetch()['score_count'];
 
-    $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE . ' where  score = ' . SourceContactValidator::FINAL_SCORE_DO_NOT_MIGRATE);
+    $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE_CONTACTS . ' where  score = ' . SourceContactValidator::FINAL_SCORE_DO_NOT_MIGRATE);
     $numDoNotMigrate = $score->fetch()['score_count'];
 
-    $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE . ' where is_main_contact = 1 and score = ' . SourceContactValidator::FINAL_SCORE_MIGRATE);
+    $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE_CONTACTS . ' where is_main_contact = 1 and score = ' . SourceContactValidator::FINAL_SCORE_MIGRATE);
     $numMainContacts = $score->fetch()['score_count'];
 
     $total = $numMigrate + $numDoNotMigrate;
@@ -31,18 +27,23 @@ class SourceContactLogger {
     echo " - Niet migreren: $numDoNotMigrate ($percentageDoNotMigrate%)\n";
   }
 
-  public function export() {
-    // OP BASIS VAN TABEL DE CSV's genereren
+  public function clearLogTableContacts() {
+    $this->dropTable(self::LOG_TABLE_CONTACTS);
   }
 
-  private function clearLogTable() {
+  public function clearLogTableMailchimp() {
+    $this->dropTable(self::LOG_TABLE_MC_GROUP_CONTACTS);
+    $this->dropTable(self::LOG_TABLE_MC_GROUPS);
+  }
+
+  private function dropTable($tableName) {
     $pdo = SourceDB::getPDO();
-    $pdo->query('drop table if exists ' . self::LOG_TABLE);
+    $pdo->query('drop table if exists ' . $tableName);
   }
 
   private function createLogTable($rating) {
     $sql = "
-      create table " . self::LOG_TABLE . "
+      create table " . self::LOG_TABLE_CONTACTS . "
       (
         id int(10) unsigned PRIMARY KEY,
         display_name varchar(255),
@@ -64,7 +65,32 @@ class SourceContactLogger {
     $pdo->query($sql);
 
     // add index on email
-    $pdo->query('CREATE INDEX em_' . self::LOG_TABLE . ' ON ' . self::LOG_TABLE . ' (email, id); ');
+    $pdo->query('CREATE INDEX em_' . self::LOG_TABLE_CONTACTS . ' ON ' . self::LOG_TABLE_CONTACTS . ' (email, id); ');
+  }
+
+  public function createMailChimpTables() {
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      CREATE TABLE " . self::LOG_TABLE_MC_GROUPS . "
+      (
+        id int(10) unsigned NOT NULL auto_increment,
+        group_name varchar(255),
+        PRIMARY KEY (id)
+      ) ENGINE=InnoDB;
+    ";
+    $pdo->query($sql);
+
+    $sql = "
+      CREATE TABLE " . self::LOG_TABLE_MC_GROUP_CONTACTS . "
+      (
+        group_id int(10),
+        email varchar(255),
+        PRIMARY KEY (group_id, email),
+        INDEX (email)
+      ) ENGINE=InnoDB;
+    ";
+    $pdo->query($sql);
   }
 
   public function logContact($contact, $rating) {
@@ -99,9 +125,39 @@ class SourceContactLogger {
     }
 
     $pdo = SourceDB::getPDO();
-    $sql = 'insert into ' . self::LOG_TABLE . '(' . implode(',', $colNames) . ') values (' . implode(',', $colPlaceHolders) . ');';
+    $sql = 'insert into ' . self::LOG_TABLE_CONTACTS . '(' . implode(',', $colNames) . ') values (' . implode(',', $colPlaceHolders) . ');';
     $stmt= $pdo->prepare($sql);
     $stmt->execute($colValues);
+  }
+
+  public function deleteMailChimpGroups() {
+
+  }
+
+  public function logMailChimpGroup($groupName) {
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      insert into
+        " . self::LOG_TABLE_MC_GROUPS . "
+      (group_name)
+      values (" . $pdo->quote($groupName) . ")
+    ";
+    $pdo->query($sql);
+
+    return $pdo->lastInsertId();
+  }
+
+  public function logMailChimpGroupContact($groupId, $email) {
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      insert into
+        " . self::LOG_TABLE_MC_GROUP_CONTACTS . "
+      (group_id, email)
+      values ($groupId, " . $pdo->quote($email) . ")
+    ";
+    $pdo->query($sql);
   }
 
 }

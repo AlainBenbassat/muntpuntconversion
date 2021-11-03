@@ -16,7 +16,8 @@ class SourceContactScoreGenerator {
   public function validateAllContacts() {
     $contactFetcher = new SourceContactFetcher();
     $contactValidator = new SourceContactValidator();
-    $scoreLogger = new SourceContactLogger(TRUE);
+    $scoreLogger = new SourceContactLogger();
+    $scoreLogger->clearLogTableContacts();
 
     $dao = $contactFetcher->getBatchAllContacts(0, $this->batchLimit);
     while ($row = $dao->fetch()) {

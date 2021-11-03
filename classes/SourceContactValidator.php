@@ -21,6 +21,7 @@ class SourceContactValidator {
     $this->hasRecentEventRegistrations($contact,$rating);
     $this->hasOptedOut($contact, $rating);
     $this->isGroupMember($contact, $rating);
+    $this->isMailchimpContact($contact, $rating);
     $this->isEventPartner($contact, $rating);
 
     $this->calculateScore($rating);
@@ -364,6 +365,25 @@ class SourceContactValidator {
     }
   }
 
+  private function isMailchimpContact($contact, &$rating) {
+    $pdo = SourceDB::getPDO();
+    $sql = "
+      select
+        group_id
+      from
+        " . SourceContactLogger::LOG_TABLE_MC_GROUP_CONTACTS . "
+      where
+        email = " . $pdo->quote($rating['email']) . "
+    ";
+    $dao = $pdo->query($sql);
+    if ($dao->fetch()) {
+      $rating['is_mailchimp_contact'] = 1;
+    }
+    else {
+      $rating['is_mailchimp_contact'] = 0;
+    }
+  }
+
   private function isEventPartner($contact, &$rating) {
     if ($contact['contact_type'] == 'Individual') {
       $rating['is_evenement_partner'] = 0;
@@ -432,6 +452,7 @@ class SourceContactValidator {
     if ($rating['heeft_recente_activiteiten'] == 1
       || $rating['lid_van_groep'] == 1
       || $rating['is_pers_medewerker'] == 1
+      || $rating['is_mailchimp_contact'] == 1
     ) {
       $rating['score'] = self::FINAL_SCORE_MIGRATE;
     }
@@ -447,6 +468,7 @@ class SourceContactValidator {
     // we keep this contact
     if ($rating['heeft_recente_activiteiten'] == 1
       || $rating['lid_van_groep'] == 1
+      || $rating['is_mailchimp_contact'] == 1
       || $rating['is_evenement_partner'] == 1
     ) {
       $rating['score'] = self::FINAL_SCORE_MIGRATE;

@@ -27,7 +27,7 @@ class SourceContactFetcher {
   public function getBatchOnlyValidContacts($startingContactId = 0, $numberOfContacts = 300) {
     $pdo = SourceDB::getPDO();
 
-    $tableName = SourceContactLogger::LOG_TABLE;
+    $tableName = SourceContactLogger::LOG_TABLE_CONTACTS;
     $score = SourceContactValidator::FINAL_SCORE_MIGRATE;
     $sql = "
       SELECT

@@ -1,8 +1,6 @@
 <?php
-set_time_limit(0);
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+
+require 'common.php';
 
 function main($task) {
   $BATCH_LIMIT = 2000000;
@@ -13,12 +11,12 @@ function main($task) {
 
     if ($task == 'score') {
       $scoreGenerator = new SourceContactScoreGenerator($BATCH_LIMIT);
-      //$scoreGenerator->validateAllContacts();
+      $scoreGenerator->validateAllContacts();
 
       $duplicateFinder = new SourceContactDuplicateFinder();
-      //$duplicateFinder->markMainContacts();
+      $duplicateFinder->markMainContacts();
 
-      $logger = new SourceContactLogger(FALSE);
+      $logger = new SourceContactLogger();
       $logger->printStats();
     }
     elseif ($task == 'convert') {
@@ -35,29 +33,6 @@ function main($task) {
   }
 
   echo "\nDone.\n";
-}
-
-function bootstrapCiviCRM() {
-  $settingsFile = '../web/sites/default/civicrm.settings.php';
-  define('CIVICRM_SETTINGS_PATH', $settingsFile);
-  require_once $settingsFile;
-
-  global $civicrm_root;
-  require_once $civicrm_root . '/CRM/Core/ClassLoader.php';
-  CRM_Core_ClassLoader::singleton()->register();
-
-  require_once 'CRM/Core/Config.php';
-  $config = CRM_Core_Config::singleton();
-
-  CRM_Utils_System::loadBootStrap([], FALSE);
-}
-
-function loadClasses() {
-  // spl_autoload_register conflicts with civi, so we use our own loader
-  $classFiles = glob("classes/*.php");
-  foreach ($classFiles as $classFile) {
-    include $classFile;
-  }
 }
 
 function getTask() {

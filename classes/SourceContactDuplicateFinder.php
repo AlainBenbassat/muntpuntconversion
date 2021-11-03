@@ -4,7 +4,7 @@ class SourceContactDuplicateFinder {
   private $tableName;
 
   public function __construct() {
-    $this->tableName = SourceContactLogger::LOG_TABLE;
+    $this->tableName = SourceContactLogger::LOG_TABLE_CONTACTS;
   }
 
   public function markMainContacts() {
