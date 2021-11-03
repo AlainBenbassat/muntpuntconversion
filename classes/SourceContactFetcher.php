@@ -11,7 +11,7 @@ class SourceContactFetcher {
       FROM
         civicrm_contact
       where
-        id > $startingContactId
+        id > $startingContactId and id in (select contact_id from civicrm_email where email = 'aberkanm@hotmail.com')
       and
         is_deleted = 0
       order by

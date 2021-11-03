@@ -18,6 +18,9 @@ class SourceContactLogger {
     $score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE . ' where  score = ' . SourceContactValidator::FINAL_SCORE_DO_NOT_MIGRATE);
     $numDoNotMigrate = $score->fetch()['score_count'];
 
+    //$score = $pdo->query('select count(id) score_count from ' . self::LOG_TABLE . ' where main_contact_id = 0 and is_main_contact = 0  score = ' . SourceContactValidator::FINAL_SCORE_MIGRATE);
+    //$numBadScoring = $score->fetch()['score_count'];
+
     $total = $numMigrate + $numDoNotMigrate;
     $percentageMigrate = round($numMigrate / $total * 100, 2);
     $percentageDoNotMigrate = round($numDoNotMigrate / $total * 100, 2);
@@ -25,6 +28,7 @@ class SourceContactLogger {
     echo "Totaal aantal contacten: $total\n";
     echo " - Te migreren: $numMigrate ($percentageMigrate%)\n";
     echo " - Niet migreren: $numDoNotMigrate ($percentageDoNotMigrate%)\n";
+    //echo " - Geen toekenning: $numBadScoring\n";
   }
 
   public function export() {
@@ -43,7 +47,9 @@ class SourceContactLogger {
         id int(10) unsigned PRIMARY KEY,
         display_name varchar(255),
         contact_type varchar(255),
-        email varchar(255)
+        email varchar(255),
+        is_main_contact int(5) default 0,
+        main_contact_id int(10) default 0
     ";
 
     foreach ($rating as $k => $v) {
@@ -117,11 +123,11 @@ class SourceContactLogger {
     while ($row = $dao->fetch()) {
       if ($contactId = $this->getContactWithRealName($row['email'])) {
         $this->markContactAsMain($contactId);
-        $this->scoreContactsWithEmail($row['email']);
+        $this->scoreContactsWithEmail($row['email'], $contactId);
       }
       else {
-        $this->markFistOccurenceAsMain('', $row['email']);
-        $this->scoreContactsWithEmail($row['email']);
+        $contactId = $this->markFistOccurenceAsMain('', $row['email']);
+        $this->scoreContactsWithEmail($row['email'], $contactId);
       }
     }
   }
@@ -130,7 +136,7 @@ class SourceContactLogger {
     $dao = $this->getQueryDuplicatesWithNameIsNotEmail();
     while ($row = $dao->fetch()) {
       if ($row['has_main_contact']) {
-        // do nothing
+        $this->scoreContactsWithNameAndEmail($row['display_name'], $row['email'], $row['min_id']);
       }
       else {
         $this->markFistOccurenceAsMain($row['display_name'], $row['email']);
@@ -140,6 +146,7 @@ class SourceContactLogger {
 
   private function getContactWithRealName($email) {
     $table = self::LOG_TABLE;
+    $pdo = SourceDB::getPDO();
 
     $sql = "
       select
@@ -147,14 +154,13 @@ class SourceContactLogger {
       from
         $table
       where
-        email = '$email'
+        email = " . $pdo->quote($email) . "
       and
         display_name_is_email = 0
       order by
         id
     ";
 
-    $pdo = SourceDB::getPDO();
     $dao = $pdo->query($sql);
     if ($row = $dao->fetch()) {
       return $row['id'];
@@ -179,19 +185,54 @@ class SourceContactLogger {
     $pdo->query($sql);
   }
 
-  private function scoreContactsWithEmail($email) {
+  private function scoreContactsWithEmail($email, $mainContactId) {
     $table = self::LOG_TABLE;
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      update
+        $table
+      set
+        main_contact_id = $mainContactId
+      where
+        is_main_contact = 0
+      and
+        email = " . $pdo->quote($email) . "
+      and
+        display_name_is_email = 1
+    ";
+    $pdo->query($sql);
+
     $sql = "
       update
         $table
       set
         score = 1
       where
+        email = " . $pdo->quote($email) . "
+    ";
+    $pdo->query($sql);
+  }
+
+  private function scoreContactsWithNameAndEmail($displayName, $email, $mainContactId) {
+    $table = self::LOG_TABLE;
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      update
+        $table
+      set
+        main_contact_id = $mainContactId,
+        score = 1
+      where
         is_main_contact = 0
       and
-        email = '$email'
+        email = " . $pdo->quote($email) . "
+      and
+        display_name = " . $pdo->quote($displayName) . "
+      and
+        id <> $mainContactId
     ";
-    $pdo = SourceDB::getPDO();
     $pdo->query($sql);
   }
 
@@ -212,7 +253,7 @@ class SourceContactLogger {
       from
         $table
       where
-        email = '$email'
+        email = " . $pdo->quote($email) . "
         $displayNameClause
       order by
         id
@@ -222,6 +263,8 @@ class SourceContactLogger {
     $row = $dao->fetch();
 
     $this->markContactAsMain($row['id']);
+
+    return $row['id'];
   }
 
   private function getQueryDuplicatesWithNameIsEmail() {
@@ -252,6 +295,7 @@ class SourceContactLogger {
         display_name
         , email
         , sum(is_main_contact) has_main_contact
+        , min(id) min_id
       from ' . self::LOG_TABLE . '
       where
         display_name_is_email = 0

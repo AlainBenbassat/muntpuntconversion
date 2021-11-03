@@ -3,8 +3,9 @@
 class SourceContactValidator {
   public const FINAL_SCORE_MIGRATE = 1;
   public const FINAL_SCORE_DO_NOT_MIGRATE = 0;
+  public const GROUPS_TO_MIGRATE = '1949, 1915, 729, 239, 311, 1757, 1891, 2003, 145, 279, 1177, 119, 731, 733, 425, 905, 2041, 1753, 1803, 1799, 1755, 1825, 1815, 1797, 1805, 1859, 1865, 2049, 1121, 1367, 1947, 687, 685, 691, 689, 115, 1399, 2051, 743, 893, 895, 869, 1051, 1049, 1501, 1827, 307, 1143, 2059, 1013, 97, 435, 437, 429, 433, 513, 431, 1499, 105, 333, 1511, 843, 829, 331, 511, 121, 441, 867, 589, 671, 673, 1061, 771, 1053, 1055, 1801, 1059, 767, 1155, 841, 107, 127, 269, 405, 133, 2015, 2011, 2013, 2017, 2019, 1153, 735, 1421, 847';
 
-  public function getValidationRating($contact) {
+  public function getRating($contact) {
     $rating = [];
 
     $this->hasDisplayName($contact, $rating);
@@ -19,8 +20,7 @@ class SourceContactValidator {
     $this->hasRecentActivities($contact, $rating);
     $this->hasRecentEventRegistrations($contact,$rating);
     $this->hasOptedOut($contact, $rating);
-    $this->isGroupMemberKeepMeInformed($contact, $rating);
-    $this->isGroupMemberUitDienst($contact, $rating);
+    $this->isGroupMember($contact, $rating);
     $this->isEventPartner($contact, $rating);
 
     $this->calculateScore($rating);
@@ -335,7 +335,7 @@ class SourceContactValidator {
     }
   }
 
-  private function isGroupMemberKeepMeInformed($contact, &$rating) {
+  private function isGroupMember($contact, &$rating) {
     $pdo = SourceDB::getPDO();
 
     $contactId = $contact['id'];
@@ -349,7 +349,7 @@ class SourceContactValidator {
       WHERE
         gc.status = 'Added'
       and
-        g.title like 'Hou mij op de hoogte%'
+        g.id in (" . self::GROUPS_TO_MIGRATE . ")
       and
         gc.contact_id = $contactId
     ";
@@ -357,39 +357,10 @@ class SourceContactValidator {
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['lid_van_groep_hou_mij_op_de_hoogte'] = 1;
+      $rating['lid_van_groep'] = 1;
     }
     else {
-      $rating['lid_van_groep_hou_mij_op_de_hoogte'] = 0;
-    }
-  }
-
-  private function isGroupMemberUitDienst($contact, &$rating) {
-    $pdo = SourceDB::getPDO();
-
-    $contactId = $contact['id'];
-    $sql = "
-      select
-        count(gc.id)
-      from
-        civicrm_group_contact gc
-      inner join
-        civicrm_group g on g.id = gc.group_id
-      WHERE
-        gc.status = 'Added'
-      and
-        g.title = 'Muntpunt medewerkers uit dienst'
-      and
-        gc.contact_id = $contactId
-    ";
-
-    $dao = $pdo->query($sql);
-    $activityCount = $dao->fetchColumn();
-    if ($activityCount) {
-      $rating['lid_van_groep_uit_dienst'] = 1;
-    }
-    else {
-      $rating['lid_van_groep_uit_dienst'] = 0;
+      $rating['lid_van_groep'] = 0;
     }
   }
 
@@ -459,8 +430,7 @@ class SourceContactValidator {
 
     // we keep this contact
     if ($rating['heeft_recente_activiteiten'] == 1
-      || $rating['lid_van_groep_hou_mij_op_de_hoogte'] == 1
-      || $rating['lid_van_groep_uit_dienst'] == 1
+      || $rating['lid_van_groep'] == 1
       || $rating['is_pers_medewerker'] == 1
     ) {
       $rating['score'] = self::FINAL_SCORE_MIGRATE;
@@ -476,6 +446,7 @@ class SourceContactValidator {
 
     // we keep this contact
     if ($rating['heeft_recente_activiteiten'] == 1
+      || $rating['lid_van_groep'] == 1
       || $rating['is_evenement_partner'] == 1
     ) {
       $rating['score'] = self::FINAL_SCORE_MIGRATE;

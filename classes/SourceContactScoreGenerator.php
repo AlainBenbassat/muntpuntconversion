@@ -13,7 +13,7 @@ class SourceContactScoreGenerator {
     $this->batchLimit = $batchLimit;
   }
 
-  public function start() {
+  public function validateAllContacts() {
     $contactFetcher = new SourceContactFetcher();
     $contactValidator = new SourceContactValidator();
     $scoreLogger = new SourceContactLogger(TRUE);
@@ -21,12 +21,19 @@ class SourceContactScoreGenerator {
     $dao = $contactFetcher->getBatchAllContacts(0, $this->batchLimit);
     while ($row = $dao->fetch()) {
       $contact = $contactFetcher->getContact($row['id']);
-      $rating = $contactValidator->getValidationRating($contact);
+      $rating = $contactValidator->getRating($contact);
 
       $scoreLogger->logContact($contact, $rating);
     }
+  }
 
+  public function resolveDuplicates() {
+    $scoreLogger = new SourceContactLogger(FALSE);
     $scoreLogger->resolveDuplicates();
+  }
+
+  public function printStats() {
+    $scoreLogger = new SourceContactLogger(FALSE);
     $scoreLogger->printStats();
   }
 }
