@@ -3,7 +3,7 @@
 require 'common.php';
 
 function main($task) {
-  $BATCH_LIMIT = 2000000;
+  $BATCH_LIMIT = 25;//0000;
 
   try {
     loadClasses();
