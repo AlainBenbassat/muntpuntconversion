@@ -64,8 +64,9 @@ class SourceContactLogger {
     $pdo = SourceDB::getPDO();
     $pdo->query($sql);
 
-    // add index on email
+    // add index on email and main_contact_id
     $pdo->query('CREATE INDEX em_' . self::LOG_TABLE_CONTACTS . ' ON ' . self::LOG_TABLE_CONTACTS . ' (email, id); ');
+    $pdo->query('CREATE INDEX mc_' . self::LOG_TABLE_CONTACTS . ' ON ' . self::LOG_TABLE_CONTACTS . ' (main_contact_id); ');
   }
 
   public function createMailChimpTables() {

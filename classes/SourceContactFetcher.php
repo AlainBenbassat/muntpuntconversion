@@ -37,11 +37,35 @@ class SourceContactFetcher {
       where
         id > $startingContactId
       and
-        score = $score and heeft_postadres = 1 and heeft_telefoonnummer = 1 and heeft_emailadres  = 1
+        is_main_contact = 1
+      and
+        score = $score
       order by
         id
       limit
         0,$numberOfContacts
+    ";
+    $dao = $pdo->query($sql);
+
+    return $dao;
+  }
+
+  public function getDuplicateContacts($mainContactId) {
+    $pdo = SourceDB::getPDO();
+
+    $tableName = SourceContactLogger::LOG_TABLE_CONTACTS;
+    $score = SourceContactValidator::FINAL_SCORE_MIGRATE;
+    $sql = "
+      SELECT
+        *
+      FROM
+        $tableName
+      where
+        main_contact_id = $mainContactId
+      and
+        score = $score
+      order by
+        id
     ";
     $dao = $pdo->query($sql);
 
@@ -93,13 +117,12 @@ class SourceContactFetcher {
   }
 
   public function getPhones($contactId) {
-    $phones = [];
+    $validPhones = [];
 
     $pdo = SourceDB::getPDO();
 
     $sql = "
       select
-        is_primary,
         location_type_id,
         phone_type_id,
         phone,
@@ -110,16 +133,32 @@ class SourceContactFetcher {
         LENGTH(phone_numeric) >= 8
       and
         contact_id = $contactId
+      order by
+        is_primary
     ";
 
-    $dao = $pdo->query($sql);
-    while ($phone = $dao->fetch()) {
+    $phones = $pdo->query($sql)->fetchAll();
+    foreach ($phones as $phone) {
       if ($this->isValidPhone($phone)) {
-        $phones[] = $this->getCleanedPhone($phone);
+        $validPhone = $this->getCleanedPhone($phone);
+
+        if (!$this->isDuplicatePhone($validPhone, $validPhones)) {
+          $validPhones[] = $validPhone;
+        }
       }
     }
 
-    return $phones;
+    return $validPhones;
+  }
+
+  private function isDuplicatePhone($newPhone, $validPhones) {
+    foreach ($validPhones as $validPhone) {
+      if ($newPhone['phone_numeric'] == $validPhone['phone_numeric']) {
+        return TRUE; // duplicate
+      }
+    }
+
+    return FALSE;
   }
 
   private function isValidPhone($phone) {
@@ -139,19 +178,18 @@ class SourceContactFetcher {
   }
 
   private function getCleanedPhone($phone) {
-    $phone = $phone['phone'];
+    $phoneNumber = $phone['phone'];
     $numericPhone = $phone['phone_numeric'];
 
     if (strlen($numericPhone) == 8) {
-      $phone .= '0';
+      $phoneNumber .= '0';
       $numericPhone .= '0';
     }
 
     $phoneParam = [
-      'is_primary' => $phone['is_primary'],
-      'location_type_id' => $phone['location_type_id'],
+      'location_type_id' => 3, // FORCE TO USE MAIN? or $phone['location_type_id'],
       'phone_type_id' => $phone['phone_type_id'],
-      'phone' => $phone,
+      'phone' => $phoneNumber,
       'phone_numeric' => $numericPhone,
     ];
 

@@ -1,36 +1,94 @@
 <?php
 
 class TargetContact {
+  const DEFAULT_FIELDS_INDIVIDUAL = ['contact_type', 'source', 'first_name', 'last_name', 'job_title', 'birth_date'];
+  const DEFAULT_FIELDS_ORGANIZATION = ['contact_type', 'source', 'organization_name'];
 
   public function create($contact) {
-    $params = $this->convertOldContactParamsToNewContactParams($contact);
+    $params = $this->convertOldParamsToNewParams($contact);
     $newContact = civicrm_api3('Contact', 'create', $params);
 
     return $newContact['id'];
   }
 
-  private function convertOldContactParamsToNewContactParams($contact) {
+  public function merge($mainContactId, $duplicateContact) {
+    $mainContact = $this->get($mainContactId);
+
+    $params = $this->fillInTheBlanks($mainContact, $duplicateContact);
+    if ($params !== FALSE) {
+      $this->update($params);
+    }
+  }
+
+  public function get($id) {
+    $result = civicrm_api3('Contact', 'getsingle', [
+      'sequential' => 1,
+      'id' => $id,
+    ]);
+
+    return $result;
+  }
+
+  public function update($params) {
+    $result = civicrm_api3('Contact', 'create', $params);
+    return $result;
+  }
+
+  private function fillInTheBlanks($mainContact, $duplicateContact) {
+    if ($mainContact['contact_type'] == 'Individual') {
+      $fieldsTocheck = ['first_name', 'last_name', 'job_title', 'birth_date'];
+    }
+    else {
+      $fieldsTocheck = ['organization_name'];
+    }
+
+    $params = [];
+    $this->copyMissingParams($mainContact, $duplicateContact, $params, $fieldsTocheck);
+
+    if (empty($params)) {
+      return FALSE;
+    }
+    else {
+      $params['id'] = $mainContact['id'];
+      $params['sequential'] = 1;
+      return $params;
+    }
+  }
+
+  private function convertOldParamsToNewParams($contact) {
     $params = [
       'sequential' => 1
     ];
 
-    // common fields
-    $this->copyParams($contact, $params, ['contact_type', 'source']);
-
     // specific fields for individual and org
     if ($contact['contact_type'] == 'Individual') {
-      $this->copyParams($contact, $params, ['first_name', 'last_name', 'job_title', 'birth_date']);
+      $this->copyParams($contact, $params, self::DEFAULT_FIELDS_INDIVIDUAL);
+      $this->handleMissingName($contact, $params);
     }
     else {
-      $this->copyParams($contact, $params, ['organization_name']);
+      $this->copyParams($contact, $params, self::DEFAULT_FIELDS_ORGANIZATION);
     }
 
     return $params;
   }
 
-  private function copyParams($fromContact, &$toParams, $fields) {
+  private function copyParams($fromParams, &$toParams, $fields) {
     foreach ($fields as $field) {
-      $toParams[$field] = $fromContact[$field];
+      $toParams[$field] = $fromParams[$field];
+    }
+  }
+
+  private function copyMissingParams($mainParams, $additionalParams, &$params, $fields) {
+    foreach ($fields as $field) {
+      if (empty($mainParams[$field]) && !empty($additionalParams[$field])) {
+        $params[$field] = $additionalParams[$field];
+      }
+    }
+  }
+
+  private function handleMissingName($contact, &$params) {
+    if (empty($params['first_name']) && empty($params['last_name'])) {
+      $params['first_name'] = $contact['display_name'];
     }
   }
 
@@ -41,4 +99,6 @@ class TargetContact {
       'identifier' => $oldId,
     ]);
   }
+
+
 }

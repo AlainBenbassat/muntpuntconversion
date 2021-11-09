@@ -3,15 +3,15 @@
 require 'common.php';
 
 function main($task) {
-  $BATCH_LIMIT = 25;//0000;
+  $BATCH_LIMIT = 2500000;
 
   try {
     loadClasses();
     bootstrapCiviCRM();
 
     if ($task == 'score') {
-      $scoreGenerator = new SourceContactScoreGenerator($BATCH_LIMIT);
-      $scoreGenerator->validateAllContacts();
+      //$scoreGenerator = new SourceContactScoreGenerator($BATCH_LIMIT);
+      //$scoreGenerator->validateAllContacts();
 
       $duplicateFinder = new SourceContactDuplicateFinder();
       $duplicateFinder->markMainContacts();
@@ -25,10 +25,10 @@ function main($task) {
     }
   }
   catch (Exception $e) {
-    echo "==============================================\n";
+    echo "============================================================================================\n";
     echo 'ERROR in ' . $e->getFile() . ', line ' . $e->getLine() . ":\n";
     echo  $e->getMessage() . "\n";
-    echo "==============================================\n\n";
+    echo "============================================================================================\n\n";
     echo "\n\n";
   }
 

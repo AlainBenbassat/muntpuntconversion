@@ -8,8 +8,16 @@ class SourceContactDuplicateFinder {
   }
 
   public function markMainContacts() {
+    $this->markContactsWithoutEmailAsMain();
     $this->markContactsWithUniqueEmailAsMain();
     $this->markContactsWithNonUniqueEmail();
+  }
+
+  private function markContactsWithoutEmailAsMain() {
+    $pdo = SourceDB::getPDO();
+
+    $sql = "update {$this->tableName} set is_main_contact = 1 where score = 1 and heeft_emailadres = 0"; // in theory only orgs
+    $pdo->query($sql);
   }
 
   private function markContactsWithUniqueEmailAsMain() {
@@ -49,6 +57,8 @@ class SourceContactDuplicateFinder {
         {$this->tableName}
       where
         email_is_uniek = 0
+      and
+        ifnull(email, '') <> ''
       group by
         email
       having
