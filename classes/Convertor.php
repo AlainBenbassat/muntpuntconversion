@@ -7,6 +7,8 @@ class Convertor {
   private $targetAddress;
   private $targetEmail;
   private $targetPhone;
+  private $eventFetcher;
+  private $targetEvent;
 
   public function __construct($batchLimit = 200) {
     $this->batchLimit = $batchLimit;
@@ -16,9 +18,15 @@ class Convertor {
     $this->targetAddress = new TargetAddress();
     $this->targetEmail = new TargetEmail();
     $this->targetPhone = new TargetPhone();
+    $this->eventFetcher = new SourceEventFetcher();
+    $this->targetEvent = new TargetEvent();
   }
 
-  public function start() {
+  public function convertContacts($clearContactTable = FALSE) {
+    if ($clearContactTable) {
+      CRM_Core_DAO::executeQuery("delete from civicrm_contact where id > 2");
+    }
+
     $dao = $this->contactFetcher->getValidMainContacts(0, $this->batchLimit);
     while ($mainContactInfo = $dao->fetch()) {
       $newMainContactId = $this->processMainContact($mainContactInfo);
@@ -27,6 +35,23 @@ class Convertor {
       while ($duplicateContactInfo = $daoDupes->fetch()) {
         $this->processDuplicateContact($newMainContactId, $duplicateContactInfo);
       }
+    }
+  }
+
+  public function convertEvents() {
+    $dao = $this->eventFetcher->getAllEventsToMigrate();
+    while ($sourceEvent = $dao->fetch()) {
+      //$newEventId = $this->targetEvent->create($sourceEvent);
+echo $sourceEvent['title'] . ' (' . $sourceEvent['start_date'] . ")\n";
+      //$this->convertEventParticipants($sourceEvent['id'], $newEventId);
+    }
+  }
+
+  public function convertEventParticipants($sourceEventId, $newEventId) {
+    $dao = $this->eventFetcher->getEventParticipants($sourceEventId);
+    while ($sourceParticipant = $dao->fetch()) {
+      $newContactId = TargetContactFinder::getContactIdByOldContactId($sourceParticipant['contact_id']);
+      $this->targetEvent->createParticipant($newEventId, $newContactId);
     }
   }
 

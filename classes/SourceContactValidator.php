@@ -18,7 +18,7 @@ class SourceContactValidator {
     $this->hasPhoneNumber($contact, $rating);
     $this->hasEmailAddress($contact, $rating);
     $this->hasRecentActivities($contact, $rating);
-    $this->hasRecentEventRegistrations($contact,$rating);
+    $this->hasEventRegistrations($contact,$rating);
     $this->hasOptedOut($contact, $rating);
     $this->isGroupMember($contact, $rating);
     $this->isMailchimpContact($contact, $rating);
@@ -271,7 +271,7 @@ class SourceContactValidator {
     }
   }
 
-  private function hasRecentEventRegistrations($contact, &$rating) {
+  private function hasEventRegistrations($contact, &$rating) {
     $pdo = SourceDB::getPDO();
 
     $contactId = $contact['id'];
@@ -282,17 +282,15 @@ class SourceContactValidator {
         civicrm_participant p
       where
         p.contact_id = $contactId
-      and
-        p.register_date >= '2017-01-01'
     ";
 
     $dao = $pdo->query($sql);
     $activityCount = $dao->fetchColumn();
     if ($activityCount) {
-      $rating['heeft_recent_deelgenomen_aan_evenementen'] = 1;
+      $rating['heeft_deelgenomen_aan_evenementen'] = 1;
     }
     else {
-      $rating['heeft_recent_deelgenomen_aan_evenementen'] = 0;
+      $rating['heeft_deelgenomen_aan_evenementen'] = 0;
     }
   }
 

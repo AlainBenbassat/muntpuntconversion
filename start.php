@@ -6,12 +6,12 @@ $validTasks = [
   'score_source_contacts',
   'mark_duplicates',
   'convert_contacts',
+  'convert_relationships',
   'convert_events',
-  'convert_participants',
   'all',
 ];
 
-$BATCH_LIMIT = 2500000;
+$BATCH_LIMIT = 500;
 
 function main() {
   try {
@@ -31,7 +31,7 @@ function main() {
     echo "============================================================================================\n";
     echo 'ERROR in ' . $e->getFile() . ', line ' . $e->getLine() . ":\n";
     echo  $e->getMessage() . "\n";
-    echo "============================================================================================\n\n";
+    echo "============================================================================================\n";
     echo "\n\n";
   }
 
@@ -42,6 +42,12 @@ function executeTask($task) {
   if (!function_exists($task)) {
     throw new Exception("Function $task doesn't exist.");
   }
+
+  echo "\n";
+  $title = "Bezig met: $task";
+  echo str_repeat("-", strlen($title)) . "\n";
+  echo "$title\n";
+  echo str_repeat("-", strlen($title)) . "\n";
 
   call_user_func($task);
 }
@@ -66,24 +72,28 @@ function score_source_contacts() {
   $logger->printStats();
 }
 
-
 function mark_duplicates() {
-
   $duplicateFinder = new SourceContactDuplicateFinder();
   $duplicateFinder->markMainContacts();
-}
 
+  $logger = new SourceContactLogger();
+  $logger->printStats();
+}
 
 function convert_contacts() {
   global $BATCH_LIMIT;
 
   $convertor = new Convertor($BATCH_LIMIT);
-  $convertor->start();
+  $convertor->convertContacts(TRUE);
 }
 
+function convert_relationships() {
+
+}
 
 function convert_events() {
-
+  $convertor = new Convertor();
+  $convertor->convertEvents();
 }
 
 function getTask() {
