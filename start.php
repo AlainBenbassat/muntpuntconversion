@@ -7,11 +7,12 @@ $validTasks = [
   'mark_duplicates',
   'convert_contacts',
   'convert_relationships',
+  'convert_event_types_roles_status',
   'convert_events',
   'all',
 ];
 
-$BATCH_LIMIT = 500;
+$BATCH_LIMIT = 500000;
 
 function main() {
   try {
@@ -84,7 +85,7 @@ function convert_contacts() {
   global $BATCH_LIMIT;
 
   $convertor = new Convertor($BATCH_LIMIT);
-  $convertor->convertContacts(TRUE);
+  $convertor->convertContacts(FALSE);
 }
 
 function convert_relationships() {
@@ -94,6 +95,11 @@ function convert_relationships() {
 function convert_events() {
   $convertor = new Convertor();
   $convertor->convertEvents();
+}
+
+function convert_event_types_roles_status() {
+  $convertor = new Convertor();
+  $convertor->convertEventTypesRolesEtc();
 }
 
 function getTask() {

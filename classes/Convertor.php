@@ -27,7 +27,7 @@ class Convertor {
       CRM_Core_DAO::executeQuery("delete from civicrm_contact where id > 2");
     }
 
-    $dao = $this->contactFetcher->getValidMainContacts(0, $this->batchLimit);
+    $dao = $this->contactFetcher->getValidMainContacts(223745, $this->batchLimit);
     while ($mainContactInfo = $dao->fetch()) {
       $newMainContactId = $this->processMainContact($mainContactInfo);
 
@@ -38,20 +38,36 @@ class Convertor {
     }
   }
 
+  public function convertEventTypesRolesEtc() {
+    $this->convertEventTypes();
+  }
+
+  public function convertEventTypes() {
+    $dao = $this->eventFetcher->getEventTypes();
+    while ($sourceEventType = $dao->fetch()) {
+      echo 'Converting event type ' . $sourceEventType['label'] . ")...\n";
+
+      $this->targetEvent->createEventType($sourceEventType);
+    }
+  }
+
   public function convertEvents() {
     $dao = $this->eventFetcher->getAllEventsToMigrate();
     while ($sourceEvent = $dao->fetch()) {
-      //$newEventId = $this->targetEvent->create($sourceEvent);
-echo $sourceEvent['title'] . ' (' . $sourceEvent['start_date'] . ")\n";
-      //$this->convertEventParticipants($sourceEvent['id'], $newEventId);
+      echo 'Converting event ' . $sourceEvent['title'] . '(' . $sourceEvent['start_date'] . ")...\n";
+
+      $newEventId = $this->targetEvent->create($sourceEvent);
+      $this->convertEventParticipants($sourceEvent['id'], $newEventId);
     }
   }
 
   public function convertEventParticipants($sourceEventId, $newEventId) {
     $dao = $this->eventFetcher->getEventParticipants($sourceEventId);
     while ($sourceParticipant = $dao->fetch()) {
+      echo '  Converting participant ' . $sourceParticipant['id'] . "...\n";
+
       $newContactId = TargetContactFinder::getContactIdByOldContactId($sourceParticipant['contact_id']);
-      $this->targetEvent->createParticipant($newEventId, $newContactId);
+      $this->targetEvent->createParticipant($newEventId, $newContactId, $sourceParticipant);
     }
   }
 

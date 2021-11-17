@@ -7,9 +7,9 @@ class TargetContactFinder {
       'identifier_type' => CRM_Muntpuntconfig_Config::ICONTACT_ID_TYPE,
       'identifier' => $contactId,
     ]);
-
     if ($result['is_error'] == 0 && $result['count'] > 0) {
-      return $result['values'][0]['id'];
+      $contact = reset($result['values']);
+      return $contact['id'];
     }
     else {
       throw new Exception("Could not find contact with old civi id = $contactId");
