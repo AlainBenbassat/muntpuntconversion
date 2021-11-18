@@ -52,11 +52,19 @@ class Convertor {
   }
 
   public function convertEvents() {
+    TargetMigrationHelper::initialize();
+
     $dao = $this->eventFetcher->getAllEventsToMigrate();
     while ($sourceEvent = $dao->fetch()) {
       echo 'Converting event ' . $sourceEvent['title'] . '(' . $sourceEvent['start_date'] . ")...\n";
 
       $newEventId = $this->targetEvent->create($sourceEvent);
+
+      if ($sourceEvent['loc_block_id']) {
+        $locBlock = $this->eventFetcher->getLocBlock($sourceEvent['loc_block_id']);
+        $this->targetEvent->addLocBlock($newEventId, $locBlock);
+      }
+
       $this->convertEventParticipants($sourceEvent['id'], $newEventId);
     }
   }

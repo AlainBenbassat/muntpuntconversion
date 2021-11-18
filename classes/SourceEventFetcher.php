@@ -21,7 +21,7 @@ class SourceEventFetcher {
             mc.score = 1
           and
             mc.heeft_deelgenomen_aan_evenementen = 1
-        ) AND ID > 17391
+        )
       order by
         id
     ";
@@ -66,5 +66,40 @@ class SourceEventFetcher {
     $dao = $pdo->query($sql);
 
     return $dao;
+  }
+
+  public function getLocBlock($locBlockId) {
+    $pdo = SourceDB::getPDO();
+    $sql = "
+      select
+        lb.id,
+        lb.address_id,
+        lb.email_id,
+        lb.phone_id,
+        a.street_address,
+        a.supplemental_address_1,
+        a.supplemental_address_2,
+        a.supplemental_address_3,
+        a.city,
+        a.postal_code,
+        a.country_id,
+        a.name,
+        e.email,
+        p.phone
+      from
+        civicrm_loc_block lb
+      left outer join
+        civicrm_address a on a.id = lb.address_id
+      left outer join
+        civicrm_email e on e.id = lb.email_id
+      left outer join
+        civicrm_phone p on p.id = lb.phone_id
+      where
+        lb.id = $locBlockId
+    ";
+
+    $dao = $pdo->query($sql);
+
+    return $dao->fetch();
   }
 }
