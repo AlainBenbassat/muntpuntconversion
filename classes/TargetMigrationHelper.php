@@ -6,10 +6,11 @@ class TargetMigrationHelper {
   public function __construct() {
     // array to depude loc blocks (i.e. event locations)
     $this->alternateIds['civicrm_loc_block'][465] = 113;
-    $this->alternateIds['civicrm_loc_block'][405] = 287;
+    $this->alternateIds['civicrm_loc_block'][405] = 287; // Use-it
     $this->alternateIds['civicrm_loc_block'][551] = 287;
     $this->alternateIds['civicrm_loc_block'][570] = 287;
     $this->alternateIds['civicrm_loc_block'][427] = 5;
+    $this->alternateIds['civicrm_loc_block'][443] = 73; // Stripmuseum Brussel
   }
 
   public static function initialize() {
@@ -29,13 +30,17 @@ class TargetMigrationHelper {
   }
 
   public function getNewId($entity, $oldId) {
-    // CACHE WERKT NIET!!!!!!!!!!!!!!!!!
-    $altOldId = $oldId; //$this->checkForAlternateId($entity, $oldId);
+    $altOldId = $this->checkForAlternateId($entity, $oldId);
 
     return CRM_Core_DAO::singleValueQuery("select new_id from migration_ids where entity = '$entity' and old_id = $altOldId");
   }
 
   private function checkForAlternateId($entity, $oldId) {
-    return empty($this->alternateIds[$entity][$oldId]) ? $oldId : $this->alternateIds[$entity][$oldId];
+    if (empty($this->alternateIds[$entity][$oldId])) {
+      return $oldId;
+    }
+    else {
+      return $this->alternateIds[$entity][$oldId];
+    }
   }
 }

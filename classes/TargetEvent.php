@@ -3,6 +3,7 @@
 class TargetEvent {
   private $optionGroupId_EventType;
   private $targetMigrationHelper;
+  private $locBlockMuntpunt = 0;
 
   public function __construct() {
     $this->optionGroupId_EventType = CRM_Core_DAO::singleValueQuery("select id from civicrm_option_group where name = 'event_type'");
@@ -115,14 +116,33 @@ class TargetEvent {
   }
 
   public function addLocBlock($newEventId, $locBlock) {
-    // do we have the id in the cache?
-    $newLocBlockId = $this->targetMigrationHelper->getNewId('civicrm_loc_block', $locBlock['id']);
-    if (empty($newLocBlockId)) {
-      $newLocBlockId = $this->createLocBlock($locBlock);
-      $this->targetMigrationHelper->storeIds('civicrm_loc_block', $locBlock['id'], $newLocBlockId);
+    if ($this->isLocBlockMuntpunt($locBlock)) {
+      if ($this->locBlockMuntpunt == 0) {
+        // not in the cache yet
+        $this->locBlockMuntpunt = $this->createLocBlock($locBlock);
+      }
+
+      $newLocBlockId = $this->locBlockMuntpunt;
+    }
+    else {
+      // do we have the id in the cache?
+      $newLocBlockId = $this->targetMigrationHelper->getNewId('civicrm_loc_block', $locBlock['id']);
+      if (empty($newLocBlockId)) {
+        $newLocBlockId = $this->createLocBlock($locBlock);
+        $this->targetMigrationHelper->storeIds('civicrm_loc_block', $locBlock['id'], $newLocBlockId);
+      }
     }
 
     CRM_Core_DAO::executeQuery("update civicrm_event set loc_block_id = $newLocBlockId where id = $newEventId");
+  }
+
+  private function isLocBlockMuntpunt($locBlock) {
+    if ($locBlock['name'] == 'Muntpunt' && $locBlock['street_address'] == 'Munt 6') {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
   }
 
   public function createLocBlock($locBlock) {
@@ -148,6 +168,10 @@ class TargetEvent {
   }
 
   public function createLocBlockAddress($locBlock) {
+    if ($locBlock['name'] == 'Stripcentrum Brussel') {
+      $locBlock['name'] = 'Stripmuseum Brussel';
+    }
+
     $params = [
       'sequential' => 1,
       'street_address' => $locBlock['street_address'],
