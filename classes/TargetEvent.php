@@ -41,6 +41,10 @@ class TargetEvent {
   }
 
   public function createParticipant($newEventId, $newContactId, $sourceParticipant) {
+    if ($this->isParticipantRegistered($newEventId, $newContactId)) {
+      return;
+    }
+
     unset($sourceParticipant['id']);
     unset($sourceParticipant['campaign_id']); // TIJDELIJK
     $sourceParticipant['event_id'] = $newEventId;
@@ -57,6 +61,16 @@ class TargetEvent {
     catch (Exception $e) {
       unset($sourceParticipant['registered_by_id']);
       civicrm_api3('Participant', 'create', $sourceParticipant);
+    }
+  }
+
+  private function isParticipantRegistered($newEventId, $newContactId) {
+    $sql = "select id from civicrm_participant where event_id = $newEventId and contact_id = $newContactId";
+    if (CRM_Core_DAO::singleValueQuery($sql)) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
     }
   }
 

@@ -40,6 +40,9 @@ class Convertor {
 
   public function convertEventTypesRolesEtc() {
     $this->convertEventTypes();
+    $this->convertCustomGroup('private_extraevent');
+    $this->convertCustomGroup('Private_event_info');
+    $this->convertCustomGroup('Private_Bios');
   }
 
   public function convertEventTypes() {
@@ -74,8 +77,18 @@ class Convertor {
     while ($sourceParticipant = $dao->fetch()) {
       echo '  Converting participant ' . $sourceParticipant['id'] . "...\n";
 
-      $newContactId = TargetContactFinder::getContactIdByOldContactId($sourceParticipant['contact_id']);
-      $this->targetEvent->createParticipant($newEventId, $newContactId, $sourceParticipant);
+      try {
+        $newContactId = TargetContactFinder::getContactIdByOldContactId($sourceParticipant['contact_id']);
+        $this->targetEvent->createParticipant($newEventId, $newContactId, $sourceParticipant);
+      }
+      catch (Exception $e) {
+        if ($e->getCode() == 999) {
+          // skip contact
+        }
+        else {
+          throw new Exception($e->getMessage(), $e->getCode());
+        }
+      }
     }
   }
 
@@ -132,4 +145,22 @@ class Convertor {
       }
     }
   }
+
+  private function convertCustomGroup($customGroupName) {
+    $sourceCustomDataFetcher = new SourceCustomDataFetcher();
+    $targetCustomData = new TargetCustomData();
+
+    $optionGroupListDao = $sourceCustomDataFetcher->getCustomGroupOptionGroups($customGroupName);
+    while ($sourceOptionGroupId = $optionGroupListDao->fetch()) {
+      [$id, $name, $title] = $sourceCustomDataFetcher->getOptionGroupDetails($sourceOptionGroupId['id']);
+      $targetCustomData->createOptionGroup($id, $name, $title);
+
+
+    }
+
+    $dao = $sourceCustomDataFetcher->getCustomDataGroup($customGroupName);
+    $targetCustomData->createCustomGroup($dao);
+  }
+
+
 }

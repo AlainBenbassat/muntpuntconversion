@@ -12,7 +12,7 @@ class TargetContactFinder {
       return $contact['id'];
     }
     else {
-      throw new Exception("Could not find contact with old civi id = $contactId");
+      throw new Exception("Could not find contact with old civi id = $contactId", 999);
     }
   }
 }
