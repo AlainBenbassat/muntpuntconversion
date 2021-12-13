@@ -29,7 +29,9 @@ class SourceCustomDataFetcher {
       inner join
         civicrm_custom_field cf on cf.custom_group_id = cg.id
       where
-        name = '$customGroupName'
+        cg.name = '$customGroupName'
+      and
+        cf.option_group_id is not null
     ";
 
     $dao = $pdo->query($sql);
@@ -53,9 +55,42 @@ class SourceCustomDataFetcher {
 
     $dao = $pdo->query($sql);
 
-    $dao->fetch();
+    $row = $dao->fetch();
 
-    return [$dao['id'], $dao['name'], $dao['title']];
+    return [$row['id'], $row['name'], $row['title']];
+  }
 
+  public function getOptionValues($optionGroupId) {
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      select
+        *
+      from
+        civicrm_option_value
+      where
+        option_group_id = $optionGroupId
+    ";
+
+    $dao = $pdo->query($sql);
+
+    return $dao;
+  }
+
+  public function getCustomFields($customGroupId) {
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      select
+        *
+      from
+        civicrm_custom_field
+      where
+        custom_group_id = $customGroupId
+    ";
+
+    $dao = $pdo->query($sql);
+
+    return $dao;
   }
 }
