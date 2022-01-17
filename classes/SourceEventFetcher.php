@@ -102,4 +102,19 @@ class SourceEventFetcher {
 
     return $dao->fetch();
   }
+
+  public function getEventCustomFields($sourceEventId, $customGroupName) {
+    $pdo = SourceDB::getPDO();
+    $sql = "select table_name from civicrm_custom_group where name = '$customGroupName'";
+    $dao = $pdo->query($sql);
+
+    if ($row = $dao->fetch()) {
+      $sql = "select * from " . $row['table_name'] . " where entity_id = $sourceEventId";
+      $dao = $pdo->query($sql);
+      return $dao->fetch();
+    }
+    else {
+      throw new Exception("Cannot find table name of custom group $customGroupName");
+    }
+  }
 }

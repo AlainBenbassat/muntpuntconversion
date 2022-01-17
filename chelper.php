@@ -3,6 +3,7 @@
 require 'common.php';
 require 'classes/SourceDB.php';
 
+$fp = null;
 
 function main() {
   bootstrapCiviCRM();
@@ -18,7 +19,7 @@ function main() {
     275 => 'Doelstelling',
     277 => 'Soorten doelgroepen',
   ];
-  //exportOptionGroups($optionGroups);
+  exportOptionGroups($optionGroups);
 
   $groups = [
     'private_extraevent' => 'Evenement extra info',
@@ -29,9 +30,10 @@ function main() {
 }
 
 function exportOptionGroups($groups) {
-  echo "{\n";
-  echo "  \"entity\": \"OptionGroup\",\n";
-  echo "  \"data\": {\n";
+  openLogFile('option_groups.json');
+  logLine("{\n");
+  logLine("  \"entity\": \"OptionGroup\",\n");
+  logLine("  \"data\": {\n");
 
   $i = 1;
   $numGroups = count($groups);
@@ -41,20 +43,21 @@ function exportOptionGroups($groups) {
     addNewLineAndOrComma($i, $numGroups);
   }
 
-  echo "  }\n";
-  echo "}\n";
+  logLine("  }\n");
+  logLine("}\n");
+  closeLogFile();
 }
 
 function exportOptionValues($optionGroupId, $title) {
   $name = convertName($title);
 
-  echo "    \"$name\": {\n";
-  echo "      \"name\": \"$name\",\n";
-  echo "      \"title\": \"$title\",\n";
-  echo "      \"is_reserved\": \"0\",\n";
-  echo "      \"is_active\": \"1\",\n";
-  echo "      \"is_locked\": \"0\",\n";
-  echo "      \"option_values\": {\n";
+  logLine("    \"$name\": {\n");
+  logLine("      \"name\": \"$name\",\n");
+  logLine("      \"title\": \"$title\",\n");
+  logLine("      \"is_reserved\": \"0\",\n");
+  logLine("      \"is_active\": \"1\",\n");
+  logLine("      \"is_locked\": \"0\",\n");
+  logLine("      \"option_values\": {\n");
 
 
   $pdo = SourceDB::getPDO();
@@ -63,29 +66,30 @@ function exportOptionValues($optionGroupId, $title) {
   $dao = $pdo->query($sql);
   $i = 1;
   while ($optionValue = $dao->fetch()) {
-    echo "        \"" . $optionValue['label'] . "\": {\n";
-    echo "          \"label\": \"" . $optionValue['label'] . "\",\n";
-    echo "          \"value\": \"" . $optionValue['value'] . "\",\n";
-    echo "          \"name\": \"" . $optionValue['name'] . "\",\n";
-    echo "          \"filter\": \"" . $optionValue['filter'] . "\",\n";
-    echo "          \"is_default\": \"" . $optionValue['is_default'] . "\",\n";
-    echo "          \"weight\": \"" . $optionValue['weight'] . "\",\n";
-    echo "          \"is_optgroup\": \"" . $optionValue['is_optgroup'] . "\",\n";
-    echo "          \"is_reserved\": \"" . $optionValue['is_reserved'] . "\",\n";
-    echo "          \"is_active\": \"" . $optionValue['is_active'] . "\",\n";
-    echo "          \"option_group\": \"" . $name . "\"\n";
-    echo "        }";
+    logLine("        \"" . $optionValue['label'] . "\": {\n");
+    logLine("          \"label\": \"" . $optionValue['label'] . "\",\n");
+    logLine("          \"value\": \"" . $optionValue['value'] . "\",\n");
+    logLine("          \"name\": \"" . $optionValue['name'] . "\",\n");
+    logLine("          \"filter\": \"" . $optionValue['filter'] . "\",\n");
+    logLine("          \"is_default\": \"" . $optionValue['is_default'] . "\",\n");
+    logLine("          \"weight\": \"" . $optionValue['weight'] . "\",\n");
+    logLine("          \"is_optgroup\": \"" . $optionValue['is_optgroup'] . "\",\n");
+    logLine("          \"is_reserved\": \"" . $optionValue['is_reserved'] . "\",\n");
+    logLine("          \"is_active\": \"" . $optionValue['is_active'] . "\",\n");
+    logLine("          \"option_group\": \"" . $name . "\"\n");
+    logLine("        }");
     addNewLineAndOrComma($i, $numValues);
   }
 
-  echo "      }\n";
-  echo "    }";
+  logLine("      }\n");
+  logLine("    }");
 }
 
 function exportCustomGroups($groups, $optionGroups) {
-  echo "{\n";
-  echo "  \"entity\": \"CustomGroup\",\n";
-  echo "  \"data\": {\n";
+  openLogFile('custom_groups.json');
+  logLine("{\n");
+  logLine("  \"entity\": \"CustomGroup\",\n");
+  logLine("  \"data\": {\n");
 
   $i = 1;
   $numGroups = count($groups);
@@ -95,28 +99,29 @@ function exportCustomGroups($groups, $optionGroups) {
     addNewLineAndOrComma($i, $numGroups);
   }
 
-  echo "  }\n";
-  echo "}\n";
+  logLine("  }\n");
+  logLine("}\n");
+  closeLogFile();
 }
 
 function exportCustomGroup($customGroupOldName, $customGroupNewName, $optionGroups) {
   $name = convertName($customGroupNewName);
 
-  echo "    \"$name\": {\n";
-  echo "      \"name\": \"$name\",\n";
-  echo "      \"title\": \"$customGroupNewName\",\n";
-  echo "      \"extends\": \"Event\",\n";
-  echo "      \"is_reserved\": \"0\",\n";
-  echo "      \"is_active\": \"1\",\n";
-  echo "      \"style\": \"Inline\",\n";
-  echo "      \"collapse_display\": \"0\",\n";
-  echo "      \"table_name\": \"civicrm_value_$name\",\n";
-  echo "      \"fields\": {\n";
+  logLine("    \"$name\": {\n");
+  logLine("      \"name\": \"$name\",\n");
+  logLine("      \"title\": \"$customGroupNewName\",\n");
+  logLine("      \"extends\": \"Event\",\n");
+  logLine("      \"is_reserved\": \"0\",\n");
+  logLine("      \"is_active\": \"1\",\n");
+  logLine("      \"style\": \"Inline\",\n");
+  logLine("      \"collapse_display\": \"0\",\n");
+  logLine("      \"table_name\": \"civicrm_value_$name\",\n");
+  logLine("      \"fields\": {\n");
 
   exportCustomFields($customGroupOldName, $optionGroups);
 
-  echo "      }\n";
-  echo "    }";
+  logLine("      }\n");
+  logLine("    }");
 }
 
 function exportCustomFields($customGroupOldName, $optionGroups) {
@@ -129,25 +134,25 @@ function exportCustomFields($customGroupOldName, $optionGroups) {
     $name = convertName($customField['name']);
     $label = convertLabel($customField['label']);
 
-    echo "        \"" . $name . "\": {\n";
-    echo "          \"name\": \"" . $name . "\",\n";
-    echo "          \"label\": \"" . $label . "\",\n";
+    logLine("        \"" . $name . "\": {\n");
+    logLine("          \"name\": \"" . $name . "\",\n");
+    logLine("          \"label\": \"" . $label . "\",\n");
 
     $fields = ['data_type', 'html_type', 'is_required', 'is_searchable', 'is_search_range', 'help_pre', 'help_post', 'mask', 'attributes', 'javascript', 'is_active', 'is_view', 'options_per_line', 'text_length', 'start_date_years', 'end_date_years', 'date_format', 'time_format', 'note_columns', 'note_rows', 'filter', 'in_selector'];
     foreach ($fields as $field) {
-      echo "          \"$field\": \"" . $customField[$field] . "\",\n";
+      logLine("          \"$field\": \"" . $customField[$field] . "\",\n");
     }
 
-    echo "          \"default_value\": \"" . convertDefaultValue($customField['default_value']) . "\",\n";
-    echo "          \"column_name\": \"" . convertColumnName($customField['column_name']) . "\",\n";
+    logLine("          \"default_value\": \"" . convertDefaultValue($customField['default_value']) . "\",\n");
+    logLine("          \"column_name\": \"" . convertColumnName($customField['column_name']) . "\",\n");
 
     if ($customField['option_group_id']) {
-      echo "          \"option_group\": \"" . convertOptionGroupIdToName($customField['option_group_id'], $optionGroups) . "\",\n";
+      logLine("          \"option_group\": \"" . convertOptionGroupIdToName($customField['option_group_id'], $optionGroups) . "\",\n");
     }
 
-    echo "          \"weight\": \"" . $i . "\"\n";
+    logLine("          \"weight\": \"" . $i . "\"\n");
 
-    echo "        }";
+    logLine("        }");
     addNewLineAndOrComma($i, $numValues);
   }
 }
@@ -195,10 +200,10 @@ function convertLabel($s) {
 
 function addNewLineAndOrComma(&$i, $total) {
   if ($i == $total) {
-    echo "\n";
+    logLine("\n");
   }
   else {
-    echo ",\n";
+    logLine(",\n");
   }
 
   $i++;
@@ -209,6 +214,21 @@ function getSingleVal($sql) {
   $q = $pdo->prepare($sql);
   $q->execute();
   return $q->fetchColumn();
+}
+
+function logLine($s) {
+  global $fp;
+  fwrite($fp, $s);
+}
+
+function openLogFile($fileName) {
+  global $fp;
+  $fp = fopen("/home/alain/public_html/muntpunt/web/sites/default/files/civicrm/ext/be.muntpunt.muntpuntconfig/resources/$fileName", 'w');
+}
+
+function closeLogFile() {
+  global $fp;
+  fclose($fp);
 }
 
 main();

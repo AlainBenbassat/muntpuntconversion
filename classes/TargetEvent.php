@@ -4,6 +4,7 @@ class TargetEvent {
   private $optionGroupId_EventType;
   private $targetMigrationHelper;
   private $locBlockMuntpunt = 0;
+  private $customFieldNameCache = [];
 
   public function __construct() {
     $this->optionGroupId_EventType = CRM_Core_DAO::singleValueQuery("select id from civicrm_option_group where name = 'event_type'");
@@ -231,4 +232,98 @@ class TargetEvent {
     CRM_Core_DAO::executeQuery("update civicrm_phone set contact_id = NULL where id = " . $result['values'][0]['id']);
     return $result['values'][0]['id'];
   }
+
+  public function addCustomFieldsExtraInfo($newEventId, $customFields) {
+    $fieldMapping = [
+      'doelgroep_289' => 'doelgroep',
+      'taal_301' => 'taal',
+      'organizer_311' => 'organisator',
+      'activiteit_status_415' => 'activiteit_status',
+      'evenement_link_473' => 'evenement_link',
+      'muntpunt_zalen_555' => 'muntpunt_zalen',
+    ];
+
+    $this->createCustomValueFromMappings($newEventId, $fieldMapping, $customFields);
+  }
+
+  public function addCustomFieldsInfo($newEventId, $customFields) {
+    $fieldMapping = [
+      'kernfunctie_303' => 'kernfunctie',
+      'sabam_op_de_hoogte_brengen__307' => 'sabam_op_de_hoogte_brengen_',
+      'dag_planning_309' => 'dag_planning',
+      'aanpreekpersoon__313' => 'aanpreekpersoon_',
+      'geschatte_deelnemers_315' => 'geschatte_deelnemers',
+      'gevoerd_promotie__323' => 'gevoerd_promotie_',
+      'verwachte_deelnemers_325' => 'verwachte_deelnemers',
+      'aanspreekpersoon_standby_327' => 'aanspreekpersoon_standby',
+      'partner_1_331' => 'partner_1',
+      'partner_2__333' => 'partner_2_',
+      'partner_4__337' => 'partner_4_',
+      'partner_3__339' => 'partner_3_',
+      'evaluatiefiche_367' => 'evaluatiefiche',
+    ];
+
+    $this->createCustomValueFromMappings($newEventId, $fieldMapping, $customFields);
+  }
+
+  public function addCustomFieldsPrivateBIOS($newEventId, $customFields) {
+    $fieldMapping = [
+      'activiteitensoort_341' => 'activiteitensoort',
+      'doelstelling_343' => 'doelstelling',
+      'soorten_doelgroepen_345' => 'soorten_doelgroepen',
+    ];
+
+    $this->createCustomValueFromMappings($newEventId, $fieldMapping, $customFields);
+  }
+
+  private function createCustomValueFromMappings($entityId, $fieldMapping, $customFields) {
+    foreach ($fieldMapping as $oldFieldName => $newFieldName) {
+      if (array_key_exists($oldFieldName, $customFields)) {
+        $this->createCustomValue($entityId, $newFieldName, $customFields[$oldFieldName]);
+      }
+    }
+  }
+
+  private function createCustomValue($entityId, $customFieldName, $customValue) {
+    if ($customValue === 0 || !empty($customValue)) {
+      [$customField, $isContactReference] = $this->getCustomFieldApiName($customFieldName);
+
+      if ($isContactReference) {
+        try {
+          $customValue = TargetContactFinder::getContactIdByOldContactId($customValue);
+        }
+        catch (Exception $e) {
+          echo "MISSING CONTACT ID = $customValue";
+          return;
+        }
+      }
+
+      echo "    -- $customFieldName / $customField = $customValue\n";
+      civicrm_api3('CustomValue', 'Create', [
+        'entity_id' => $entityId,
+        $customField => $customValue,
+      ]);
+    }
+  }
+
+  private function getCustomFieldApiName($customFieldName) {
+    if (!empty($this->customFieldNameCache[$customFieldName])) {
+      return [$this->customFieldNameCache[$customFieldName][0], $this->customFieldNameCache[$customFieldName][1]];
+    }
+
+    $dao = CRM_Core_DAO::executeQuery("select concat('custom_', id) custom_n, data_type from civicrm_custom_field where name = '$customFieldName'");
+
+    if ($dao->fetch()) {
+      $custom_n = $dao->custom_n;
+      $isContactReference = ($dao->data_type == 'ContactReference') ? TRUE : FALSE;
+      $this->customFieldNameCache[$customFieldName] = [$custom_n, $isContactReference];
+
+      return [$custom_n, $isContactReference];
+    }
+    else {
+      throw new Exception("Cannot find $customFieldName");
+    }
+
+  }
+
 }
