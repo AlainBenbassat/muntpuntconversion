@@ -3,6 +3,7 @@
 require 'common.php';
 
 $validTasks = [
+  'test_db',
   'score_source_contacts',
   'mark_duplicates',
   'convert_contacts',
@@ -100,6 +101,18 @@ function convert_events() {
 function convert_event_types_roles_status() {
   $convertor = new Convertor();
   $convertor->convertEventTypesRolesEtc();
+}
+
+function test_db() {
+  $pdo = SourceDB::getPDO();
+  $sql = "select count(*) num_contacts from civicrm_contact where is_deleted = 1";
+  $dao = $pdo->query($sql);
+  if ($row = $dao->fetch()) {
+    echo 'Number of contacts in source database: ' . $row['num_contacts'] . "\n";
+  }
+  else {
+    throw new \Exception("Cannot retrieve number of contacts in source database");
+  }
 }
 
 function getTask() {
