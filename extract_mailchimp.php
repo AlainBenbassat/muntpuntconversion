@@ -106,9 +106,9 @@ function parseMailchimpCSV($file, $groupId) {
     throw new Exception("Cannot open csv-file: $file");
   }
 
+  $logger = new SourceContactLogger();
   while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
     if ($row > 1) {
-      $logger = new SourceContactLogger();
       $logger->logMailChimpGroupContact($groupId, $data[0]);
     }
 
