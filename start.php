@@ -105,7 +105,7 @@ function convert_event_types_roles_status() {
 
 function test_db() {
   $pdo = SourceDB::getPDO();
-  $sql = "select count(*) num_contacts from civicrm_contact where is_deleted = 1";
+  $sql = "select count(*) num_contacts from civicrm_contact where is_deleted = 0";
   $dao = $pdo->query($sql);
   if ($row = $dao->fetch()) {
     echo 'Number of contacts in source database: ' . $row['num_contacts'] . "\n";
