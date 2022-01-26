@@ -22,7 +22,7 @@ class SourceContactValidator {
     $this->hasOptedOut($contact, $rating);
     $this->isGroupMember($contact, $rating);
     $this->isMailchimpContact($contact, $rating);
-    $this->isEventPartner($contact, $rating);
+    $this->isEventContactReference($contact, $rating);
 
     $this->calculateScore($rating);
 
@@ -382,11 +382,7 @@ class SourceContactValidator {
     }
   }
 
-  private function isEventPartner($contact, &$rating) {
-    if ($contact['contact_type'] == 'Individual') {
-      $rating['is_evenement_partner'] = 0;
-    }
-
+  private function isEventContactReference($contact, &$rating) {
     $pdo = SourceDB::getPDO();
 
     $contactId = $contact['id'];
@@ -403,6 +399,10 @@ class SourceContactValidator {
         partner_3__339 = $contactId
       or
         partner_4__337 = $contactId
+      or
+        aanpreekpersoon__313 = $contactId
+      or
+        aanspreekpersoon_standby_327 = $contactId
     ";
 
     $dao = $pdo->query($sql);
@@ -411,7 +411,15 @@ class SourceContactValidator {
       $rating['is_evenement_partner'] = 1;
     }
     else {
-      $rating['is_evenement_partner'] = 0;
+      $sql = "select count(id) from civicrm_value_evenet_doelpgroep_109 where organizer_311 = $contactId";
+      $dao = $pdo->query($sql);
+      $activityCount = $dao->fetchColumn();
+      if ($activityCount) {
+        $rating['is_evenement_partner'] = 1;
+      }
+      else {
+        $rating['is_evenement_partner'] = 0;
+      }
     }
   }
 
