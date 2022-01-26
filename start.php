@@ -113,6 +113,9 @@ function test_db() {
   else {
     throw new \Exception("Cannot retrieve number of contacts in source database");
   }
+
+  $numInTargetDB = CRM_Core_DAO::singleValueQuery($sql);
+  echo "Number of contacts in target database: $numInTargetDB\n";
 }
 
 function getTask() {
