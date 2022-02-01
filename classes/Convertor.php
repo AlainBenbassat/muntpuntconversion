@@ -40,9 +40,6 @@ class Convertor {
 
   public function convertEventTypesRolesEtc() {
     $this->convertEventTypes();
-    $this->convertCustomGroup('private_extraevent');
-    $this->convertCustomGroup('Private_event_info');
-    $this->convertCustomGroup('Private_Bios');
   }
 
   public function convertEventTypes() {
