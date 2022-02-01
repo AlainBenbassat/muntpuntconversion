@@ -1,6 +1,10 @@
 <?php
 
 class TargetCustomData {
+  public function __construct() {
+    die("TargetCustomData IS OBSOLETE!!!\nCustom data and option groups should be created with muntpunt config items\n");
+  }
+
   public function createCustomGroup($sourceDAO) {
     if (!$this->existsCustomGroup($sourceDAO['name'])) {
       $cols = $this->getCustomGroupTableSpecs();

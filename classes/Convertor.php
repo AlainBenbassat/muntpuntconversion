@@ -27,7 +27,7 @@ class Convertor {
       CRM_Core_DAO::executeQuery("delete from civicrm_contact where id > 2");
     }
 
-    $dao = $this->contactFetcher->getValidMainContacts(223745, $this->batchLimit);
+    $dao = $this->contactFetcher->getValidMainContacts(0, $this->batchLimit);
     while ($mainContactInfo = $dao->fetch()) {
       $newMainContactId = $this->processMainContact($mainContactInfo);
 
