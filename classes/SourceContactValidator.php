@@ -295,6 +295,10 @@ class SourceContactValidator {
   }
 
   private function isActiveDrupalUser($drupalId, &$rating) {
+    // DISBLE THIS CHECK?!?
+    $rating['heeft_actief_Drupal_account'] = 0;
+    return;
+
     $pdo = SourceDB::getPDO();
 
     if ($drupalId) {
