@@ -21,6 +21,7 @@ class SourceContactScoreGenerator {
 
     $dao = $contactFetcher->getBatchAllContacts(0, $this->batchLimit);
     while ($row = $dao->fetch()) {
+      echo 'Processing contact ' . $row['id'];
       $contact = $contactFetcher->getContact($row['id']);
       $rating = $contactValidator->getRating($contact);
 
