@@ -40,6 +40,8 @@ class SourceContactFetcher {
         is_main_contact = 1
       and
         score = $score
+      and
+        contact_type in ('Individual', 'Organization')
       order by
         id
       limit
