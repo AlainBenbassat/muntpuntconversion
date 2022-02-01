@@ -20,8 +20,10 @@ class SourceContactScoreGenerator {
     $scoreLogger->clearLogTableContacts();
 
     $dao = $contactFetcher->getBatchAllContacts(0, $this->batchLimit);
+    $i = 0;
     while ($row = $dao->fetch()) {
-      echo 'Processing contact ' . $row['id'] . "\n";
+      $i++;
+      echo "$i. Processing contact with id = " . $row['id'] . "\n";
       $contact = $contactFetcher->getContact($row['id']);
       $rating = $contactValidator->getRating($contact);
 
