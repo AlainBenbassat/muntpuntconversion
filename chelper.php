@@ -170,6 +170,11 @@ function convertName($s) {
 
 function convertColumnName($s) {
   $s = trim(preg_replace('/_[0-9]+$/', '', $s));
+
+  if ($s == 'organizer') {
+    $s = 'organisator';
+  }
+
   return $s;
 }
 

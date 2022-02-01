@@ -2,7 +2,7 @@
 
 class TargetCustomData {
   public function createCustomGroup($sourceDAO) {
-    if (!$this->existsCustomGroup($sourceDAO['id'])) {
+    if (!$this->existsCustomGroup($sourceDAO['name'])) {
       $cols = $this->getCustomGroupTableSpecs();
       $this->insertIntoTable('civicrm_custom_group', $cols, $sourceDAO);
     }
@@ -41,8 +41,8 @@ class TargetCustomData {
     }
   }
 
-  private function existsCustomGroup($id) {
-    $id = CRM_Core_DAO::singleValueQuery("select id from civicrm_group where id = $id");
+  private function existsCustomGroup($name) {
+    $id = CRM_Core_DAO::singleValueQuery("select name from civicrm_group where name = '$name'");
     if ($id) {
       return TRUE;
     }
