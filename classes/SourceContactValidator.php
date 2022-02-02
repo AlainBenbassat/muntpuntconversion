@@ -463,6 +463,7 @@ class SourceContactValidator {
       || $rating['lid_van_groep'] == 1
       || $rating['is_pers_medewerker'] == 1
       || $rating['is_mailchimp_contact'] == 1
+      || $rating['is_evenement_partner'] == 1
     ) {
       $rating['score'] = self::FINAL_SCORE_MIGRATE;
     }

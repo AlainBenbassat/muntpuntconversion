@@ -64,6 +64,7 @@ class TargetContact {
     if ($contact['contact_type'] == 'Individual') {
       $this->copyParams($contact, $params, self::DEFAULT_FIELDS_INDIVIDUAL);
       $this->handleMissingName($contact, $params);
+      $this->truncateLongValues($contact, $params);
     }
     else {
       $this->copyParams($contact, $params, self::DEFAULT_FIELDS_ORGANIZATION);
@@ -90,6 +91,11 @@ class TargetContact {
     if (empty($params['first_name']) && empty($params['last_name'])) {
       $params['first_name'] = $contact['display_name'];
     }
+  }
+
+  private function truncateLongValues($contact, &$params) {
+    $params['first_name'] = substr($params['first_name'], 0, 64);
+    $params['last_name'] = substr($params['last_name'], 0, 64);
   }
 
   public function addOldCiviCRMId($oldId, $newId) {
