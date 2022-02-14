@@ -10,7 +10,7 @@ class SourceEventFetcher {
       FROM
         civicrm_event e
       where
-        id in (
+        e.id in (
           select
             distinct p.event_id
           from
@@ -22,6 +22,8 @@ class SourceEventFetcher {
           and
             mc.heeft_deelgenomen_aan_evenementen = 1
         )
+      or
+        e.start_date >= '2019-01-01'
       order by
         id
     ";

@@ -75,7 +75,7 @@ Voer uit:
 
     php start.php mark_duplicates
 
-## Stap 3: data migeren
+## Stap 4: data migeren
 
 De civicrm data wordt in stappen gemigreerd:
 
@@ -85,4 +85,4 @@ De civicrm data wordt in stappen gemigreerd:
     php start.php convert_event_types_roles_status
     php start.php convert_events
 
-
+We migreren alle toekomstige evenementen + afgelopen evenementen met deelnemers die we gaan migreren.
