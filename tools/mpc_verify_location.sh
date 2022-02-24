@@ -7,4 +7,12 @@ then
   exit 1
 fi
 
+TMP_FOLDER=../tmp
+if [[ ! -d "$TMP_FOLDER" ]]
+then
+  echo "ERROR: Cannot find $TMP_FOLDER"
+  exit 1
+fi
+
+
 exit 0
