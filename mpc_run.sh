@@ -23,4 +23,15 @@ tools/mpc_copy_icontact_database.sh
 tools/mpc_restore_blank__civi_database.sh
 [[ $? != 0 ]] && mpc_exit
 
+#===================
+# install extensions
+#===================
+tools/mpc_install_extensions.sh
+[[ $? != 0 ]] && mpc_exit
+
+#=============================
+# Enable Muntpunt config items
+#=============================
+php tools/mpc_set_muntpunt_config.php
+
 echo "OK"

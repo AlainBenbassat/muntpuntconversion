@@ -7,6 +7,13 @@ then
   exit 1
 fi
 
+EXT_FOLDER=../web/sites/default/files/civicrm/ext
+if [[ ! -f "$EXT_FOLDER" ]]
+then
+  echo "ERROR: Cannot find $EXT_FOLDER"
+  exit 1
+fi
+
 TMP_FOLDER=../tmp
 if [[ ! -d "$TMP_FOLDER" ]]
 then
@@ -14,5 +21,3 @@ then
   exit 1
 fi
 
-
-exit 0
