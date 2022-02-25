@@ -22,7 +22,7 @@ function bootstrapCiviCRM() {
 
 function loadClasses() {
   // spl_autoload_register conflicts with civi, so we use our own loader
-  $classFiles = glob("classes/*.php");
+  $classFiles = glob(__DIR__ . "/classes/*.php");
   foreach ($classFiles as $classFile) {
     include $classFile;
   }
