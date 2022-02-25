@@ -368,6 +368,12 @@ class SourceContactValidator {
   }
 
   private function isMailchimpContact($contact, &$rating) {
+    $rating['is_mailchimp_contact'] = 0;
+    return;
+
+    /* NOT FOR NOW */
+
+
     $pdo = SourceDB::getPDO();
     $sql = "
       select
