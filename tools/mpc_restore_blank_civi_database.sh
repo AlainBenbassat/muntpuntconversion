@@ -1,4 +1,5 @@
 #!/bin/bash
+CVCOMMAND=../vendor/totten/cv
 
 CIVI_CREDENTIALS=settings/civi.cnf
 if [[ ! -f "$CIVI_CREDENTIALS" ]]
@@ -14,3 +15,4 @@ mysql --defaults-file="$CIVI_CREDENTIALS" db18740 < tools/drop_all_tables.sql
 echo "Restoring the clean NL civi..."
 mysql --defaults-file="$CIVI_CREDENTIALS" db18740 < ../tmp/cleane_civi_NL.sql
 
+"$CVCOMMAND" flush

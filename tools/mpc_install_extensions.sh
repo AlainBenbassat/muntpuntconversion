@@ -48,5 +48,7 @@ installExtensionWithGit mosaicomsgtpl https://lab.civicrm.org/extensions/mosaico
 installExtensionWithGit nz.co.fuzion.omnipaymultiprocessor https://github.com/eileenmcnaughton/nz.co.fuzion.omnipaymultiprocessor.git
 installExtensionWithGit prettyworkflowmessages https://lab.civicrm.org/extensions/prettyworkflowmessages.git
 installExtensionWithCv org.civicrm.recentmenu
+installExtensionWithCv dataprocessor
+installExtensionWithGit dataprocessor-duplicatecontacts https://lab.civicrm.org/extensions/dataprocessor-duplicatecontacts.git
 
-cv ext:upgrade-db
+"$CVCOMMAND" ext:upgrade-db

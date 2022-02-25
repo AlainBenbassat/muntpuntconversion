@@ -20,7 +20,7 @@ tools/mpc_copy_icontact_database.sh
 #================================
 # Restore the blank civi database
 #================================
-tools/mpc_restore_blank__civi_database.sh
+tools/mpc_restore_blank_civi_database.sh
 [[ $? != 0 ]] && mpc_exit
 
 #===================
