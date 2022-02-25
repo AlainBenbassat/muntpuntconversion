@@ -8,7 +8,7 @@ then
 fi
 
 EXT_FOLDER=../web/sites/default/files/civicrm/ext
-if [[ ! -f "$EXT_FOLDER" ]]
+if [[ ! -d "$EXT_FOLDER" ]]
 then
   echo "ERROR: Cannot find $EXT_FOLDER"
   exit 1
