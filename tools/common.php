@@ -6,7 +6,7 @@ ini_set('display_startup_errors', 1);
 ini_set('error_reporting', E_ALL);
 
 function bootstrapCiviCRM() {
-  $settingsFile = '../../web/sites/default/civicrm.settings.php';
+  $settingsFile = __DIR__ . '/../../web/sites/default/civicrm.settings.php';
   define('CIVICRM_SETTINGS_PATH', $settingsFile);
   require_once $settingsFile;
 
