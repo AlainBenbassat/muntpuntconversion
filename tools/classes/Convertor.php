@@ -104,7 +104,7 @@ class Convertor {
   }
 
   private function processMainContact($contactInfo) {
-    echo 'Converting main contact ' . $contactInfo['id'] . "...\n";
+    //echo 'Converting main contact ' . $contactInfo['id'] . "...\n";
 
     $contact = $this->contactFetcher->getContact($contactInfo['id']);
     $newContactId = $this->targetContact->create($contact);
@@ -137,7 +137,7 @@ class Convertor {
   }
 
   private function processDuplicateContact($mainContactId, $contactInfo) {
-    echo '  merging duplicate contact ' . $contactInfo['id'] . "...\n";
+    //echo '  merging duplicate contact ' . $contactInfo['id'] . "...\n";
 
     $contact = $this->contactFetcher->getContact($contactInfo['id']);
     $this->targetContact->merge($mainContactId, $contact);
