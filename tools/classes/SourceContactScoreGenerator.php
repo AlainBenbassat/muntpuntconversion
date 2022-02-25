@@ -23,7 +23,7 @@ class SourceContactScoreGenerator {
     $i = 0;
     while ($row = $dao->fetch()) {
       $i++;
-      echo "$i. Processing contact with id = " . $row['id'] . "\n";
+      //echo "$i. Processing contact with id = " . $row['id'] . "\n";
       $contact = $contactFetcher->getContact($row['id']);
       $rating = $contactValidator->getRating($contact);
 
