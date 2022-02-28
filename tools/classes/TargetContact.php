@@ -94,8 +94,8 @@ class TargetContact {
   }
 
   private function truncateLongValues($contact, &$params) {
-    $params['first_name'] = substr(trim($params['first_name']), 0, 64);
-    $params['last_name'] = substr(trim($params['last_name']), 0, 64);
+    $params['first_name'] = mb_substr(trim($params['first_name']), 0, 60);
+    $params['last_name'] = mb_substr(trim($params['last_name']), 0, 60);
   }
 
   public function addOldCiviCRMId($oldId, $newId) {

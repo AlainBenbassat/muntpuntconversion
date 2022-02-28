@@ -39,9 +39,9 @@ cd "$EXTPATH"
 #  or custom
 installExtensionConfigItems
 installExtensionWithCv uk.co.vedaconsulting.mosaico
+installExtensionWithGit de.systopia.identitytracker https://github.com/systopia/de.systopia.identitytracker.git
 installExtensionWithGit be.muntpunt.muntpuntconfig https://github.com/AlainBenbassat/be.muntpunt.muntpuntconfig.git
 installExtensionWithGit be.muntpunt.eventlist https://github.com/AlainBenbassat/be.muntpunt.eventlist.git
-installExtensionWithGit de.systopia.identitytracker https://github.com/systopia/de.systopia.identitytracker.git
 installExtensionWithGit com.osseed.eventcalendar https://github.com/osseed/com.osseed.eventcalendar.git
 installExtensionWithGit finsburypark https://lab.civicrm.org/extensions/finsburypark.git
 installExtensionWithGit mosaicomsgtpl https://lab.civicrm.org/extensions/mosaicomsgtpl.git
