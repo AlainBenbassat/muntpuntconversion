@@ -14,6 +14,8 @@ class SourceRelationshipFetcher {
         civicrm_relationship_type rt on r.relationship_type_id = rt.id and rt.name_a_b = 'Employee of'
       inner join
         migration_contacts mc on mc.id = r.contact_id_a
+      inner join
+        civicrm_contact c on r.contact_id_b = c.id
       where
         mc.score = 1
       and
@@ -22,6 +24,8 @@ class SourceRelationshipFetcher {
         r.relationship_type_id = 4
       and
         r.is_active = 1
+      and
+        c.is_deleted = 0
       order by
         r.id
     ";
