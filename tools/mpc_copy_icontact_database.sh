@@ -31,6 +31,7 @@ mysqldump  --defaults-file="$REMOTE_ICONTACT_CREDENTIALS" -h 172.25.17.2 -P 3307
   civicrm_participant \
   civicrm_phone \
   civicrm_relationship \
+  civicrm_relationship_type \
   civicrm_uf_match \
   civicrm_value_evenet_doelpgroep_109 \
   civicrm_value_private_event_info_115 \
