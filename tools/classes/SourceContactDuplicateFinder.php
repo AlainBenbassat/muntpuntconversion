@@ -31,16 +31,16 @@ class SourceContactDuplicateFinder {
     $dao = $this->getQueryDuplicateEmails();
     while ($row = $dao->fetch()) {
       if ($row['has_display_name_is_email']) {
-        $contactId = $this->getFirstContactWithRealName($row['email']);
+        $contactId = $this->getFirstContactWithRealName($row['email'], $row['contact_type']);
         if ($contactId) {
-          $this->markContactAsMainForEmail($contactId, $row['email']);
+          $this->markContactAsMainForEmail($contactId, $row['email'], $row['contact_type']);
         }
         else {
-          $this->markContactAsMainForEmail($row['min_id'], $row['email']);
+          $this->markContactAsMainForEmail($row['min_id'], $row['email'], $row['contact_type']);
         }
       }
       else {
-        $this->markContactAsMainForEmail($row['min_id'], $row['email']);
+        $this->markContactAsMainForEmail($row['min_id'], $row['email'], $row['contact_type']);
       }
     }
   }
@@ -51,6 +51,7 @@ class SourceContactDuplicateFinder {
     $sql = "
       select
         email
+        , contact_type
         , sum(display_name_is_email) has_display_name_is_email
         , min(id) min_id
       from
@@ -60,7 +61,7 @@ class SourceContactDuplicateFinder {
       and
         ifnull(email, '') <> ''
       group by
-        email
+        email, contact_type
       having
         sum(score) > 0
     ";
@@ -70,7 +71,7 @@ class SourceContactDuplicateFinder {
     return $dao;
   }
 
-  private function getFirstContactWithRealName($email) {
+  private function getFirstContactWithRealName($email, $contactType) {
     $pdo = SourceDB::getPDO();
 
     $sql = "
@@ -82,6 +83,8 @@ class SourceContactDuplicateFinder {
         email = " . $pdo->quote($email) . "
       and
         display_name_is_email = 0
+      and
+        contact_type = '$contactType'
       order by
         id
     ";
@@ -95,9 +98,9 @@ class SourceContactDuplicateFinder {
     }
   }
 
-  private function markContactAsMainForEmail($contactId, $email) {
+  private function markContactAsMainForEmail($contactId, $email, $contactType) {
     $this->markContactAsMain($contactId);
-    $this->markOtherContactsForEmail($contactId, $email);
+    $this->markOtherContactsForEmail($contactId, $email, $contactType);
   }
 
   private function markContactAsMain($contactId) {
@@ -114,7 +117,7 @@ class SourceContactDuplicateFinder {
     $pdo->query($sql);
   }
 
-  private function markOtherContactsForEmail($contactId, $email) {
+  private function markOtherContactsForEmail($contactId, $email, $contactType) {
     $pdo = SourceDB::getPDO();
 
     $sql = "
@@ -128,6 +131,8 @@ class SourceContactDuplicateFinder {
         email = " . $pdo->quote($email) . "
       and
         id <> $contactId
+      and
+        contact_type = '$contactType'
     ";
     $pdo = SourceDB::getPDO();
     $pdo->query($sql);

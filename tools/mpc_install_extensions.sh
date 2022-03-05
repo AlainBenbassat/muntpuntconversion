@@ -2,7 +2,8 @@
 
 EXTPATH=../web/sites/default/files/civicrm/ext
 CVCOMMAND=$(pwd)/../vendor/totten/cv
-DRUSHCOMMAND=$(pwd)/../vendor/drush/drush/drush
+#DRUSHCOMMAND=$(pwd)/../vendor/drush/drush/drush
+DRUSHCOMMAND=drush
 
 function enableExtension() {
   "$CVCOMMAND" ext:enable $1
