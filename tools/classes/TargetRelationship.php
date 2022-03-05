@@ -16,7 +16,7 @@ class TargetRelationship {
     $params = [
       'contact_id_a' => $newContactIdA,
       'contact_id_b' => $newContactIdB,
-      'relationship_type_id' => $employeeRelationship['relationship_type_id'],
+      'relationship_type_id' => 5, //$employeeRelationship['relationship_type_id'],
       'is_active' => $employeeRelationship['is_active'],
     ];
 
