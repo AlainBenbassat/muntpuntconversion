@@ -30,4 +30,9 @@ class SourceContactScoreGenerator {
       $scoreLogger->logContact($contact, $rating);
     }
   }
+
+  public function validateEmployers() {
+    $scoreLogger = new SourceContactLogger();
+    $scoreLogger->logEmployers();
+  }
 }

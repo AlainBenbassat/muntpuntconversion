@@ -69,6 +69,7 @@ function score_source_contacts() {
 
   $scoreGenerator = new SourceContactScoreGenerator($BATCH_LIMIT);
   $scoreGenerator->validateAllContacts();
+  $scoreGenerator->validateEmployers();
 
   $logger = new SourceContactLogger();
   $logger->printStats();
@@ -90,7 +91,10 @@ function convert_contacts() {
 }
 
 function convert_relationships() {
+  global $BATCH_LIMIT;
 
+  $convertor = new Convertor($BATCH_LIMIT);
+  $convertor->convertRelationships();
 }
 
 function convert_events() {

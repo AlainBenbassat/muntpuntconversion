@@ -289,11 +289,8 @@ class TargetEvent {
       [$customField, $isContactReference] = $this->getCustomFieldApiName($customFieldName);
 
       if ($isContactReference) {
-        try {
-          $customValue = TargetContactFinder::getContactIdByOldContactId($customValue);
-        }
-        catch (Exception $e) {
-          echo "MISSING CONTACT ID = $customValue";
+        $customValue = TargetContactFinder::getContactIdByOldContactId($customValue);
+        if (!$customValue) {
           return;
         }
       }

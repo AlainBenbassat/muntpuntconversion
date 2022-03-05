@@ -161,4 +161,20 @@ class SourceContactLogger {
     $pdo->query($sql);
   }
 
+  public function logEmployers() {
+    $pdo = SourceDB::getPDO();
+    $sql = "
+      select
+        c.employer_id
+      from " . self::LOG_TABLE_CONTACTS . " ltc
+      inner join
+        civicrm_contact c on ltc.id = c.id
+      where
+        contact_type = 'Individual' and heeft_actieve_relaties = 1 and score = 1 and c.employer_id > 0";
+    $dao = $pdo->query($sql);
+    while ($row = $dao->fetch()) {
+      $sqlUpdateEmployerScore = "update " . self::LOG_TABLE_CONTACTS . " set score = 1 where id = " . $row['employer_id'];
+      $pdo->query($sqlUpdateEmployerScore);
+    }
+  }
 }

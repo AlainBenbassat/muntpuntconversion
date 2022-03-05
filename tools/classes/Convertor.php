@@ -9,6 +9,7 @@ class Convertor {
   private $targetPhone;
   private $eventFetcher;
   private $targetEvent;
+  private $targetRelationship;
 
   public function __construct($batchLimit = 200) {
     $this->batchLimit = $batchLimit;
@@ -18,7 +19,9 @@ class Convertor {
     $this->targetAddress = new TargetAddress();
     $this->targetEmail = new TargetEmail();
     $this->targetPhone = new TargetPhone();
+    $this->targetRelationship = new TargetRelationship();
     $this->eventFetcher = new SourceEventFetcher();
+    $this->relationshipFetcher = new SourceRelationshipFetcher();
     $this->targetEvent = new TargetEvent();
   }
 
@@ -40,6 +43,15 @@ class Convertor {
 
   public function convertEventTypesRolesEtc() {
     $this->convertEventTypes();
+  }
+
+  public function convertRelationships() {
+    $dao = $this->relationshipFetcher->getAllEmployeeRelationshipsToMigrate();
+    while ($employeeRelationship = $dao->fetch()) {
+      echo 'Converting employee relationship between ' . $employeeRelationship['contact_id_a'] . ' and ' . $employeeRelationship['contact_id_b'] . "...\n";
+
+      $this->targetRelationship->createRelationship($employeeRelationship);
+    }
   }
 
   public function convertEventTypes() {
@@ -88,17 +100,9 @@ class Convertor {
     while ($sourceParticipant = $dao->fetch()) {
       echo '  Converting participant ' . $sourceParticipant['id'] . "...\n";
 
-      try {
-        $newContactId = TargetContactFinder::getContactIdByOldContactId($sourceParticipant['contact_id']);
+      $newContactId = TargetContactFinder::getContactIdByOldContactId($sourceParticipant['contact_id']);
+      if ($newEventId) {
         $this->targetEvent->createParticipant($newEventId, $newContactId, $sourceParticipant);
-      }
-      catch (Exception $e) {
-        if ($e->getCode() == 999) {
-          // skip contact
-        }
-        else {
-          throw new Exception($e->getMessage(), $e->getCode());
-        }
       }
     }
   }
@@ -126,6 +130,7 @@ class Convertor {
         $this->targetPhone->create($newContactId, $sourcePhones);
       }
     }
+
 
     // contributions
     // events

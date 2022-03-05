@@ -118,6 +118,24 @@ class SourceContactFetcher {
     }
   }
 
+  public function getEmployeeRelationships() {
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      SELECT
+        *
+      FROM
+        civicrm_relationship
+      where
+        is_active = 1
+      and
+        relationship_type_id = 4
+    ";
+    $dao = $pdo->query($sql);
+
+    return $dao;
+  }
+
   public function getPhones($contactId) {
     $validPhones = [];
 

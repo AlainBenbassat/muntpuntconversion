@@ -2,6 +2,7 @@
 
 EXTPATH=../web/sites/default/files/civicrm/ext
 CVCOMMAND=$(pwd)/../vendor/totten/cv
+DRUSHCOMMAND=$(pwd)/../vendor/drush/drush/drush
 
 function enableExtension() {
   "$CVCOMMAND" ext:enable $1
@@ -52,3 +53,5 @@ installExtensionWithCv dataprocessor
 installExtensionWithGit dataprocessor-duplicatecontacts https://lab.civicrm.org/extensions/dataprocessor-duplicatecontacts.git
 
 "$CVCOMMAND" ext:upgrade-db
+"$DRUSHCOMMAND" cr
+
