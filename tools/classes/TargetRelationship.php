@@ -5,7 +5,7 @@ class TargetRelationship {
     $newContactIdA = TargetContactFinder::getContactIdByOldContactId($employeeRelationship['contact_id_a']);
     $newContactIdB = TargetContactFinder::getContactIdByOldContactId($employeeRelationship['contact_id_a']);
     if ($newContactIdA && $newContactIdB) {
-      if (!$this->hasRelationship($newContactIdA, $newContactIdB, 4)) {
+      if (!$this->hasRelationship($newContactIdA, $newContactIdB, 5)) {
         $params = $this->convertOldParamsToNewParams($employeeRelationship, $newContactIdA, $newContactIdB);
         civicrm_api3('Relationship', 'create', $params);
       }
