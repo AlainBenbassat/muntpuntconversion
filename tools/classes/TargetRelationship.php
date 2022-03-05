@@ -3,7 +3,7 @@
 class TargetRelationship {
   public function createRelationship($employeeRelationship) {
     $newContactIdA = TargetContactFinder::getContactIdByOldContactId($employeeRelationship['contact_id_a']);
-    $newContactIdB = TargetContactFinder::getContactIdByOldContactId($employeeRelationship['contact_id_a']);
+    $newContactIdB = TargetContactFinder::getContactIdByOldContactId($employeeRelationship['contact_id_b']);
     if ($newContactIdA && $newContactIdB) {
       if (!$this->hasRelationship($newContactIdA, $newContactIdB, 5)) {
         $params = $this->convertOldParamsToNewParams($employeeRelationship, $newContactIdA, $newContactIdB);
