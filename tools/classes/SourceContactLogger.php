@@ -170,7 +170,7 @@ class SourceContactLogger {
       inner join
         civicrm_contact c on ltc.id = c.id
       where
-        contact_type = 'Individual' and heeft_actieve_relaties = 1 and score = 1 and c.employer_id > 0";
+        ltc.contact_type = 'Individual' and ltc.heeft_actieve_relaties = 1 and ltc.score = 1 and c.employer_id > 0";
     $dao = $pdo->query($sql);
     while ($row = $dao->fetch()) {
       $sqlUpdateEmployerScore = "update " . self::LOG_TABLE_CONTACTS . " set score = 1 where id = " . $row['employer_id'];
