@@ -165,10 +165,13 @@ class SourceContactLogger {
     $pdo = SourceDB::getPDO();
     $sql = "
       select
-        c.employer_id
-      from " . self::LOG_TABLE_CONTACTS . " ltc
+        r.contact_id_b employer_id
+      from " . self::LOG_TABLE_CONTACTS . "
+        ltc
       inner join
         civicrm_contact c on ltc.id = c.id
+      inner join
+        civicrm_relationship r on r.contact_id_a = c.id and r.relationship_type_id = 4 and r.is_active = 1
       where
         ltc.contact_type = 'Individual' and ltc.heeft_actieve_relaties = 1 and ltc.score = 1 and c.employer_id > 0";
     $dao = $pdo->query($sql);
