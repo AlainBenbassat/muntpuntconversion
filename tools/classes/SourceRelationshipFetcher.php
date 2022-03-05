@@ -20,6 +20,8 @@ class SourceRelationshipFetcher {
         mc.heeft_actieve_relaties = 1
       and
         r.relationship_type_id = 4
+      and
+        r.is_active = 1
       order by
         r.id
     ";
