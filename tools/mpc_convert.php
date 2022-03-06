@@ -69,15 +69,20 @@ function score_source_contacts() {
 
   $scoreGenerator = new SourceContactScoreGenerator($BATCH_LIMIT);
   $scoreGenerator->validateAllContacts();
-  $scoreGenerator->validateEmployers();
+
 
   $logger = new SourceContactLogger();
   $logger->printStats();
 }
 
 function mark_duplicates() {
+  global $BATCH_LIMIT;
+
   $duplicateFinder = new SourceContactDuplicateFinder();
   $duplicateFinder->markMainContacts();
+
+  $scoreGenerator = new SourceContactScoreGenerator($BATCH_LIMIT);
+  $scoreGenerator->validateEmployers();
 
   $logger = new SourceContactLogger();
   $logger->printStats();
