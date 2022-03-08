@@ -17,6 +17,7 @@ class TargetEvent {
     unset($sourceEvent['loc_block_id']);
     unset($sourceEvent['participant_listing_id']);
     unset($sourceEvent['campaign_id']); // TIJDELIJK
+    unset($sourceEvent['payment_processor']);
 
     if ($sourceEvent['financial_type_id'] == 7) {
       $sourceEvent['financial_type_id'] = 4;
