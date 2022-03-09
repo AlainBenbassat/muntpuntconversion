@@ -45,8 +45,8 @@ sed -i 's/DEFINER=`db16377`@`%`/DEFINER=`db19666`@`localhost`/g' ../tmp/icontact
 [[ $? != 0 ]] && exit 1
 
 echo "Clearing local icontact database..."
-mysql --defaults-file="$LOCAL_ICONTACT_CREDENTIALS" db19666 < tools/drop_all_tables.sql
+mysql --defaults-file="$LOCAL_ICONTACT_CREDENTIALS" < tools/drop_all_tables.sql
 [[ $? != 0 ]] && exit 1
 
 echo "Restoring the database locally..."
-mysql --defaults-file="$LOCAL_ICONTACT_CREDENTIALS" db19666 < ../tmp/icontact.sql
+mysql --defaults-file="$LOCAL_ICONTACT_CREDENTIALS" < ../tmp/icontact.sql

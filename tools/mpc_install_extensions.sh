@@ -40,6 +40,7 @@ cd "$EXTPATH"
 #  install extension with cv
 #  or custom
 installExtensionConfigItems
+installExtensionWithGit nz.co.fuzion.omnipaymultiprocessor https://github.com/eileenmcnaughton/nz.co.fuzion.omnipaymultiprocessor.git
 installExtensionWithCv uk.co.vedaconsulting.mosaico
 installExtensionWithGit de.systopia.identitytracker https://github.com/systopia/de.systopia.identitytracker.git
 installExtensionWithGit be.muntpunt.muntpuntconfig https://github.com/AlainBenbassat/be.muntpunt.muntpuntconfig.git
@@ -47,7 +48,6 @@ installExtensionWithGit be.muntpunt.eventlist https://github.com/AlainBenbassat/
 installExtensionWithGit com.osseed.eventcalendar https://github.com/osseed/com.osseed.eventcalendar.git
 installExtensionWithGit finsburypark https://lab.civicrm.org/extensions/finsburypark.git
 installExtensionWithGit mosaicomsgtpl https://lab.civicrm.org/extensions/mosaicomsgtpl.git
-installExtensionWithGit nz.co.fuzion.omnipaymultiprocessor https://github.com/eileenmcnaughton/nz.co.fuzion.omnipaymultiprocessor.git
 installExtensionWithGit prettyworkflowmessages https://lab.civicrm.org/extensions/prettyworkflowmessages.git
 installExtensionWithCv org.civicrm.recentmenu
 installExtensionWithCv dataprocessor

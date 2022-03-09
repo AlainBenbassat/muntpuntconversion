@@ -93,10 +93,12 @@ function exportCustomGroups($groups, $optionGroups) {
 
   $i = 1;
   $numGroups = count($groups);
+  $weight = 1;
   foreach ($groups as $customGroupOldName => $customGroupNewName) {
-    exportCustomGroup($customGroupOldName, $customGroupNewName, $optionGroups);
+    exportCustomGroup($customGroupOldName, $customGroupNewName, $optionGroups, $weight);
 
     addNewLineAndOrComma($i, $numGroups);
+    $weight++;
   }
 
   logLine("  }\n");
@@ -104,7 +106,7 @@ function exportCustomGroups($groups, $optionGroups) {
   closeLogFile();
 }
 
-function exportCustomGroup($customGroupOldName, $customGroupNewName, $optionGroups) {
+function exportCustomGroup($customGroupOldName, $customGroupNewName, $optionGroups, $weight) {
   $name = convertName($customGroupNewName);
 
   logLine("    \"$name\": {\n");
@@ -116,6 +118,7 @@ function exportCustomGroup($customGroupOldName, $customGroupNewName, $optionGrou
   logLine("      \"style\": \"Inline\",\n");
   logLine("      \"collapse_display\": \"0\",\n");
   logLine("      \"table_name\": \"civicrm_value_$name\",\n");
+  logLine("      \"weight\": \"$weight\",\n");
   logLine("      \"fields\": {\n");
 
   exportCustomFields($customGroupOldName, $optionGroups);
