@@ -10,6 +10,8 @@ class Convertor {
   private $eventFetcher;
   private $targetEvent;
   private $targetRelationship;
+  private $targetGroup;
+  private $relationshipFetcher;
 
   public function __construct($batchLimit = 200) {
     $this->batchLimit = $batchLimit;
@@ -22,7 +24,9 @@ class Convertor {
     $this->targetRelationship = new TargetRelationship();
     $this->eventFetcher = new SourceEventFetcher();
     $this->relationshipFetcher = new SourceRelationshipFetcher();
+    $this->groupFetcher = new SourceGroupFetcher();
     $this->targetEvent = new TargetEvent();
+    $this->targetGroup = new TargetGroup();
   }
 
   public function convertContacts($clearContactTable = FALSE) {
@@ -51,6 +55,26 @@ class Convertor {
       echo 'Converting employee relationship between ' . $employeeRelationship['contact_id_a'] . ' and ' . $employeeRelationship['contact_id_b'] . "...\n";
 
       $this->targetRelationship->createRelationship($employeeRelationship);
+    }
+  }
+
+  public function convertGroups() {
+    $dao = $this->groupFetcher->getGroupsToMigrate();
+    while ($group = $dao->fetch()) {
+      echo 'Converting group ' . $group['id'] . "...\n";
+
+      $this->targetGroup->create($group);
+
+      $this->convertGroupContacts($group['id']);
+    }
+  }
+
+  public function convertGroupContacts($groupId) {
+    $dao = $this->groupFetcher->getGroupContacts($groupId);
+    while ($groupContact = $dao->fetch()) {
+      echo 'Converting group contact ' . $groupContact['id'] . "...\n";
+
+      $this->targetGroup->createGroupContact($groupId, $groupContact['id']);
     }
   }
 

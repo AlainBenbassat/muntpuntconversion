@@ -7,6 +7,7 @@ $validTasks = [
   'score_source_contacts',
   'mark_duplicates',
   'convert_contacts',
+  'convert_groups',
   'convert_relationships',
   'convert_event_types_roles_status',
   'convert_events',
@@ -100,6 +101,13 @@ function convert_relationships() {
 
   $convertor = new Convertor($BATCH_LIMIT);
   $convertor->convertRelationships();
+}
+
+function convert_groups() {
+  global $BATCH_LIMIT;
+
+  $convertor = new Convertor($BATCH_LIMIT);
+  $convertor->convertGroups();
 }
 
 function convert_events() {

@@ -24,6 +24,10 @@ function installExtensionConfigItems() {
     git clone https://lab.civicrm.org/extensions/configitems.git
   fi
 
+  cd configitems
+  git checkout 1.3.5
+  cd ..
+
   enableExtension civiconfig
 }
 
@@ -51,7 +55,7 @@ installExtensionWithGit mosaicomsgtpl https://lab.civicrm.org/extensions/mosaico
 installExtensionWithGit prettyworkflowmessages https://lab.civicrm.org/extensions/prettyworkflowmessages.git
 installExtensionWithCv org.civicrm.recentmenu
 installExtensionWithCv dataprocessor
-installExtensionWithGit dataprocessor-duplicatecontacts https://lab.civicrm.org/extensions/dataprocessor-duplicatecontacts.git
+#installExtensionWithGit dataprocessor-duplicatecontacts https://lab.civicrm.org/extensions/dataprocessor-duplicatecontacts.git
 
 "$CVCOMMAND" ext:upgrade-db
 "$DRUSHCOMMAND" cr
