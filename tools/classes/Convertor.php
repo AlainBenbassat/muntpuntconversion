@@ -72,9 +72,9 @@ class Convertor {
   public function convertGroupContacts($groupId) {
     $dao = $this->groupFetcher->getGroupContacts($groupId);
     while ($groupContact = $dao->fetch()) {
-      echo 'Converting group contact ' . $groupContact['id'] . "...\n";
+      echo 'Converting group contact ' . $groupContact['contact_id'] . "...\n";
 
-      $this->targetGroup->createGroupContact($groupId, $groupContact['id']);
+      $this->targetGroup->createGroupContact($groupId, $groupContact['contact_id']);
     }
   }
 
