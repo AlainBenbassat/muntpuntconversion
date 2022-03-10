@@ -30,7 +30,9 @@ class TargetGroup {
   }
 
   private function keepOriginalGroupId($oldId, $newId) {
-    $sql = "update civicrm_group set id = $oldId where id = $newId";
-    CRM_Core_DAO::executeQuery($sql);
+    if ($oldId != $newId) {
+      $sql = "update civicrm_group set id = $oldId where id = $newId";
+      CRM_Core_DAO::executeQuery($sql);
+    }
   }
 }
