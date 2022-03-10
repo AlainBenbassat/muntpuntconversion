@@ -9,10 +9,10 @@ then
 fi
 
 echo "Clearing civi database..."
-mysql --defaults-file="$CIVI_CREDENTIALS" db18740 < tools/drop_all_tables.sql
+mysql --defaults-file="$CIVI_CREDENTIALS" < tools/drop_all_tables.sql
 [[ $? != 0 ]] && exit 1
 
 echo "Restoring the clean NL civi..."
-mysql --defaults-file="$CIVI_CREDENTIALS" db18740 < ../tmp/cleane_civi_NL.sql
+mysql --defaults-file="$CIVI_CREDENTIALS" < ../tmp/cleane_civi_NL.sql
 
 "$CVCOMMAND" flush
