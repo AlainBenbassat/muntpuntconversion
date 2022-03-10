@@ -11,7 +11,7 @@ class TargetGroup {
     if ($newContactId) {
       civicrm_api3('GroupContact', 'create', [
         'group_id' => $groupId,
-        'contact_id' => $groupContactId,
+        'contact_id' => $newContactId,
         'status' => 'Added',
       ]);
     }
