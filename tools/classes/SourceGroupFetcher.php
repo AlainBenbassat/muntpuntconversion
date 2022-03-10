@@ -25,7 +25,7 @@ class SourceGroupFetcher {
       SELECT
         *
       FROM
-        civicrm_group_contact
+        civicrm_group_contact_cache
       where
         id = $groupId
       and
