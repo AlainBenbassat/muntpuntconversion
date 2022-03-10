@@ -27,7 +27,7 @@ class SourceGroupFetcher {
       FROM
         civicrm_group_contact
       where
-        id = $groupId
+        group_id = $groupId
       and
         status = 'Added'
     ";
