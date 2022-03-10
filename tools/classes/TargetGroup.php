@@ -7,7 +7,14 @@ class TargetGroup {
   }
 
   public function createGroupContact($groupId, $groupContactId) {
-
+    $newContactId = TargetContactFinder::getContactIdByOldContactId($groupContactId);
+    if ($newContactId) {
+      civicrm_api3('GroupContact', 'create', [
+        'group_id' => $groupId,
+        'contact_id' => $groupContactId,
+        'status' => 'Added',
+      ]);
+    }
   }
 
   private function createWithAPI($group) {
