@@ -20,7 +20,12 @@ $config = CRM_Core_Config::singleton();
 CRM_Utils_System::loadBootStrap(array(), FALSE);
 /*** end of bootstrap process ***/
 
-
 CRM_Muntpuntconfig_Preferences::set();
+
+$iniFile = parse_ini_file(__DIR__ . '/../settings/civi.cnf', TRUE);
+CRM_Muntpuntconfig_Preferences::setSMTP($iniFile['smtpsettings']);
+
+CRM_Muntpuntconfig_Preferences::setBackendTheme();
+
 CRM_Muntpuntconfig_ConfigItems::load();
 

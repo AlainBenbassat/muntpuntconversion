@@ -35,6 +35,8 @@ tools/mpc_install_extensions.sh
 php tools/mpc_set_muntpunt_config.php
 [[ $? != 0 ]] && mpc_exit
 
+../vendor/totten/cv flush
+
 #=====================
 # Start the conversion
 #=====================
