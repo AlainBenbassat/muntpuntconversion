@@ -44,7 +44,7 @@ cd "$EXTPATH"
 #  install extension with cv
 #  or custom
 installExtensionConfigItems
-installExtensionWithGit nz.co.fuzion.omnipaymultiprocessor https://github.com/eileenmcnaughton/nz.co.fuzion.omnipaymultiprocessor.git
+#installExtensionWithGit nz.co.fuzion.omnipaymultiprocessor https://github.com/eileenmcnaughton/nz.co.fuzion.omnipaymultiprocessor.git
 installExtensionWithCv uk.co.vedaconsulting.mosaico
 installExtensionWithGit de.systopia.identitytracker https://github.com/systopia/de.systopia.identitytracker.git
 installExtensionWithGit be.muntpunt.muntpuntconfig https://github.com/AlainBenbassat/be.muntpunt.muntpuntconfig.git
