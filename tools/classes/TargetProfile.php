@@ -42,26 +42,30 @@ class TargetProfile {
   }
 
   public function createField($newProfileId, $field) {
-    $result = civicrm_api3('UfField', 'create', [
-      'uf_group_id' => $newProfileId,
-      'field_name' => $field['field_name'],
-      'is_active' => $field['is_active'],
-      'is_view' => $field['is_view'],
-      'is_required' => $field['is_required'],
-      'weight' => $field['weight'],
-      'help_post' => $field['help_post'],
-      'help_pre' => $field['help_pre'],
-      'visibility' => $field['visibility'],
-      'in_selector' => $field['in_selector'],
-      'is_searchable' => $field['is_searchable'],
-      'location_type_id' => $field['location_type_id'],
-      'phone_type_id' => $field['phone_type_id'],
-      'website_type_id' => $field['website_type_id'],
-      'label' => $field['label'],
-      'field_type' => $field['field_type'],
-      'is_reserved' => $field['is_reserved'],
-      'is_multi_summary' => $field['is_multi_summary'],
-    ]);
+    // api3 and api4 give error!
+    $columnSpecs = [
+      'uf_group_id' => 'Integer',
+      'field_name' => 'String',
+      'is_active' => 'Integer',
+      'is_view' => 'Integer',
+      'is_required' => 'Integer',
+      'weight' => 'Integer',
+      'help_post' => 'String',
+      'help_pre' => 'String',
+      'visibility' => 'String',
+      'in_selector' => 'Integer',
+      'is_searchable' => 'Integer',
+      'location_type_id' => 'Integer',
+      'phone_type_id' => 'Integer',
+      'website_type_id' => 'Integer',
+      'label' => 'String',
+      'field_type' => 'String',
+      'is_reserved' => 'Integer',
+      'is_multi_summary' => 'Integer',
+    ];
+
+    $field['uf_group_id'] = $newProfileId;
+    $this->targetMigrationHelper->insertIntoTable('civicrm_uf_table', $columnSpecs, $field);
   }
 
   public function createEventProfile($newEventId, $profile) {

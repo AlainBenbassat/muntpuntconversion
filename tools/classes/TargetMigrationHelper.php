@@ -43,4 +43,23 @@ class TargetMigrationHelper {
       return $this->alternateIds[$entity][$oldId];
     }
   }
+
+  public function insertIntoTable($tableName, $columnSpecs, $sourceValues) {
+    $i = 0;
+    $sqlParams = [];
+    $columnList = [];
+    $valueList = [];
+
+    foreach ($columnSpecs as $columnName => $columnDataType) {
+      if (!empty($sourceValues[$columnName])) {
+        $i++;
+        $columnList[] = $columnName;
+        $valueList[] = "%$i";
+        $sqlParams[$i] = [$sourceValues[$columnName], $columnDataType];
+      }
+    }
+
+    $sql = "insert into $tableName (" . implode(',', $columnList) . ') values (' . implode(',', $valueList) . ')';
+    CRM_Core_DAO::executeQuery($sql, $sqlParams);
+  }
 }
