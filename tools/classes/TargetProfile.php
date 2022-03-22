@@ -65,7 +65,7 @@ class TargetProfile {
     ];
 
     $field['uf_group_id'] = $newProfileId;
-    $this->targetMigrationHelper->insertIntoTable('civicrm_uf_table', $columnSpecs, $field);
+    $this->targetMigrationHelper->insertIntoTable('civicrm_uf_field', $columnSpecs, $field);
   }
 
   public function createEventProfile($newEventId, $profile) {
