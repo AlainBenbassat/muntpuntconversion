@@ -41,7 +41,7 @@ class SourceEventFetcher {
       from
         civicrm_recurring_entity
       where
-        event_table = 'civicrm_event'
+        entity_table = 'civicrm_event'
     ";
 
     $dao = $pdo->query($sql);
