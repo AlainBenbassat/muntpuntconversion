@@ -63,6 +63,8 @@ class Convertor {
   }
 
   public function convertProfiles() {
+    TargetMigrationHelper::initialize();
+
     $dao = $this->profileFetcher->getProfilesToMigrate();
     while ($profile = $dao->fetch()) {
       $newProfileId = $this->targetProfile->create($profile);
@@ -108,8 +110,6 @@ class Convertor {
   }
 
   public function convertEvents() {
-    TargetMigrationHelper::initialize();
-
     $dao = $this->eventFetcher->getAllEventsToMigrate();
     while ($sourceEvent = $dao->fetch()) {
       echo 'Converting event ' . $sourceEvent['title'] . '(' . $sourceEvent['start_date'] . ")...\n";
