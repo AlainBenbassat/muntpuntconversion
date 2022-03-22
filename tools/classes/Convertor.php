@@ -12,6 +12,8 @@ class Convertor {
   private $targetRelationship;
   private $targetGroup;
   private $relationshipFetcher;
+  private $profileFetcher;
+  private $targetProfile;
 
   public function __construct($batchLimit = 200) {
     $this->batchLimit = $batchLimit;
@@ -27,6 +29,8 @@ class Convertor {
     $this->groupFetcher = new SourceGroupFetcher();
     $this->targetEvent = new TargetEvent();
     $this->targetGroup = new TargetGroup();
+    $this->profileFetcher = new SourceProfileFetcher();
+    $this->targetProfile = new TargetProfile();
   }
 
   public function convertContacts($clearContactTable = FALSE) {
@@ -55,6 +59,22 @@ class Convertor {
       echo 'Converting employee relationship between ' . $employeeRelationship['contact_id_a'] . ' and ' . $employeeRelationship['contact_id_b'] . "...\n";
 
       $this->targetRelationship->createRelationship($employeeRelationship);
+    }
+  }
+
+  public function convertProfiles() {
+    $dao = $this->profileFetcher->getProfilesToMigrate();
+    while ($profile = $dao->fetch()) {
+      $newProfileId = $this->targetProfile->create($profile);
+
+      $this->convertProfileFields($profile['id'], $newProfileId);
+    }
+  }
+
+  public function convertProfileFields($oldProfileId, $newProfileId) {
+    $dao = $this->profileFetcher->getProfileFields($oldProfileId);
+    while ($profileField = $dao->fetch()) {
+      $this->targetProfile->createField($newProfileId, $profileField);
     }
   }
 
@@ -114,8 +134,18 @@ class Convertor {
       $customFields = $this->eventFetcher->getEventCustomFields($sourceEvent['id'], 'Private_Bios');
       $this->targetEvent->addCustomFieldsPrivateBIOS($newEventId, $customFields);
 
+      echo "  converting profiles...\n";
+      $this->convertEventProfiles($sourceEvent['id'], $newEventId);
+
       echo "  converting participants...\n";
       $this->convertEventParticipants($sourceEvent['id'], $newEventId);
+    }
+  }
+
+  public function convertRecurringEvents() {
+    $dao = $this->eventFetcher->getRecurringEvents();
+    while ($recurringEvent = $dao->fetch()) {
+      $this->targetEvent->createRecurringEvent($recurringEvent);
     }
   }
 
@@ -128,6 +158,13 @@ class Convertor {
       if ($newEventId) {
         $this->targetEvent->createParticipant($newEventId, $newContactId, $sourceParticipant);
       }
+    }
+  }
+
+  public function convertEventProfiles($sourceEventId, $newEventId) {
+    $dao = $this->profileFetcher->getEventProfiles($sourceEventId);
+    while ($profile = $dao->fetch()) {
+      $this->targetProfile->createEventProfile($newEventId, $profile);
     }
   }
 

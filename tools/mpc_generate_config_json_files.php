@@ -115,6 +115,7 @@ function exportCustomGroup($customGroupOldName, $customGroupNewName, $optionGrou
   logLine("      \"extends\": \"Event\",\n");
   logLine("      \"is_reserved\": \"0\",\n");
   logLine("      \"is_active\": \"1\",\n");
+  logLine("      \"is_public\": \"0\",\n");
   logLine("      \"style\": \"Inline\",\n");
   logLine("      \"collapse_display\": \"0\",\n");
   logLine("      \"table_name\": \"civicrm_value_$name\",\n");

@@ -32,6 +32,23 @@ class SourceEventFetcher {
     return $dao;
   }
 
+  public function getRecurringEvents() {
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      select
+        *
+      from
+        civicrm_recurring_entity
+      where
+        event_table = 'civicrm_event'
+    ";
+
+    $dao = $pdo->query($sql);
+
+    return $dao;
+  }
+
   public function getEventParticipants($sourceEventId) {
     $pdo = SourceDB::getPDO();
 

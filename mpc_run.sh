@@ -40,6 +40,7 @@ php tools/mpc_set_muntpunt_config.php
 #=====================
 # Start the conversion
 #=====================
+php tools/mpc_convert.php profiles
 php tools/mpc_convert.php score_source_contacts
 php tools/mpc_convert.php mark_duplicates
 php tools/mpc_convert.php convert_contacts

@@ -12,6 +12,8 @@ class TargetEvent {
   }
 
   public function create($sourceEvent) {
+    $oldEventId = $sourceEvent['id'];
+
     unset($sourceEvent['id']);
     unset($sourceEvent['created_id']);
     unset($sourceEvent['loc_block_id']);
@@ -38,7 +40,39 @@ class TargetEvent {
       throw new Exception("Cannot create event " . $sourceEvent['title']);
     }
     else {
-      return $result['values'][0]['id'];
+      $newEventId = $result['values'][0]['id'];
+      $this->targetMigrationHelper->storeIds('civicrm_event', $oldEventId, $newEventId);
+      return $newEventId;
+    }
+  }
+
+  public function createRecurringEvent($recurringEvent) {
+    $parentId = $this->targetMigrationHelper->getNewId('civicrm_event', $recurringEvent['parent_id']);
+    $entityId = $this->targetMigrationHelper->getNewId('civicrm_event', $recurringEvent['entity_id']);
+
+    if ($parentId && $entityId) {
+      $sql = "
+        insert into
+          civicrm_recurring_entity (
+           parent_id,
+           entity_id,
+           entity_table,
+           mode
+        )
+        values (
+           %1,
+           %2,
+           'civicrm_event',
+           %3
+        )
+      ";
+      $sqlParams = [
+        1 => [$parentId, 'Integer'],
+        2 => [$entityId, 'Integer'],
+        3 => [$recurringEvent['mode'], 'Integer'],
+      ];
+
+      CRM_Core_DAO::executeQuery($sql, $sqlParams);
     }
   }
 

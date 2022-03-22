@@ -4,6 +4,7 @@ require 'common.php';
 
 $validTasks = [
   'test_db',
+  'profiles',
   'score_source_contacts',
   'mark_duplicates',
   'convert_contacts',
@@ -65,6 +66,10 @@ function executeAllTasks() {
   }
 }
 
+function profiles() {
+
+}
+
 function score_source_contacts() {
   global $BATCH_LIMIT;
 
@@ -96,6 +101,11 @@ function convert_contacts() {
   $convertor->convertContacts(FALSE);
 }
 
+function convert_profiles() {
+  $convertor = new Convertor();
+  $convertor->convertProfiles();
+}
+
 function convert_relationships() {
   global $BATCH_LIMIT;
 
@@ -113,6 +123,7 @@ function convert_groups() {
 function convert_events() {
   $convertor = new Convertor();
   $convertor->convertEvents();
+  $convertor->convertRecurringEvents();
 }
 
 function convert_event_types_roles_status() {
