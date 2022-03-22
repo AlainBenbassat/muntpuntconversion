@@ -67,7 +67,10 @@ function executeAllTasks() {
 }
 
 function profiles() {
+  global $BATCH_LIMIT;
 
+  $convertor = new Convertor($BATCH_LIMIT);
+  $convertor->convertProfiles();
 }
 
 function score_source_contacts() {
