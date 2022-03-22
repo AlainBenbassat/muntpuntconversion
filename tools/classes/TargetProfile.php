@@ -28,8 +28,6 @@ class TargetProfile {
       'notify' => $profile['notify'],
       'is_reserved' => $profile['is_reserved'],
       'name' => $profile['name'],
-      'created_id' => $profile['created_id'],
-      'created_date' => $profile['created_date'],
       'is_proximity_search' => $profile['is_proximity_search'],
     ]);
 
