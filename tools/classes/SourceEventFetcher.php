@@ -63,6 +63,8 @@ class SourceEventFetcher {
         mc.score = 1
       and
         p.event_id = $sourceEventId
+      order by
+        p.id
     ";
     $dao = $pdo->query($sql);
 

@@ -81,6 +81,7 @@ class TargetEvent {
       return;
     }
 
+    $oldParticipantId = $sourceParticipant['id'];
     unset($sourceParticipant['id']);
     unset($sourceParticipant['campaign_id']); // TIJDELIJK
     $sourceParticipant['event_id'] = $newEventId;
@@ -91,13 +92,19 @@ class TargetEvent {
       $sourceParticipant['status_id'] = 1;
     }
 
-    try {
-      civicrm_api3('Participant', 'create', $sourceParticipant);
+    if ($sourceParticipant['registered_by_id']) {
+      $newRegisteredById = $this->targetMigrationHelper->getNewId('civicrm_participant', $sourceParticipant['registered_by_id']);
+      if ($newRegisteredById) {
+        $sourceParticipant['registered_by_id'] = $newRegisteredById;
+      }
+      else {
+        unset($sourceParticipant['registered_by_id']);
+      }
     }
-    catch (Exception $e) {
-      unset($sourceParticipant['registered_by_id']);
-      civicrm_api3('Participant', 'create', $sourceParticipant);
-    }
+
+    $result = civicrm_api3('Participant', 'create', $sourceParticipant);
+    $newParticipantId = $result['values'][0]['id'];
+    $this->targetMigrationHelper->storeIds('civicrm_participant', $oldParticipantId, $newParticipantId);
   }
 
   private function isParticipantRegistered($newEventId, $newContactId) {
