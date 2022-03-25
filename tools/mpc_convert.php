@@ -3,19 +3,18 @@
 require 'common.php';
 
 $validTasks = [
-  'test_db',
-  'profiles',
-  'score_source_contacts',
-  'mark_duplicates',
-  'convert_contacts',
-  'convert_groups',
-  'convert_relationships',
-  'convert_event_types_roles_status',
-  'convert_events',
+  'test_db' => '',
+  'score_source_contacts' => 'ContactScore',
+  'mark_duplicates' => 'ContactDuplicate',
+  'convert_profiles' => 'ConvertorProfile',
+  'convert_campaigns' => 'ConvertorCampaign',
+  'convert_contacts' => 'ConvertorContact',
+  'convert_groups' => 'ConvertorCampaign',
+  'convert_relationships' => 'ConvertorRelationship',
+  'convert_event_types' => 'ConvertorEventType',
+  'convert_events' => 'ConvertorEvent',
   'all',
 ];
-
-$BATCH_LIMIT = 500000;
 
 function main() {
   try {
@@ -43,17 +42,49 @@ function main() {
 }
 
 function executeTask($task) {
-  if (!function_exists($task)) {
-    throw new Exception("Function $task doesn't exist.");
-  }
-
   echo "\n";
   $title = "Bezig met: $task";
   echo str_repeat("-", strlen($title)) . "\n";
   echo "$title\n";
   echo str_repeat("-", strlen($title)) . "\n";
 
+  if (isTaskInOwnClass($task)) {
+    runClassTask($task);
+  }
+  else {
+    runLocalTask($task);
+  }
+}
+
+function isTaskInOwnClass($task) {
+  $className = getClassOfTask($task);
+  if ($className) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+function runLocalTask($task) {
+  if (!function_exists($task)) {
+    throw new Exception("Function $task doesn't exist.");
+  }
+
   call_user_func($task);
+}
+
+function runClassTask($task) {
+  $class = getClassOfTask($task);
+
+  $o = new $class();
+  $o->run();
+}
+
+function getClassOfTask($task) {
+  global $validTasks;
+
+  return $validTasks['task'];
 }
 
 function executeAllTasks() {
@@ -64,89 +95,6 @@ function executeAllTasks() {
       executeTask($task);
     }
   }
-}
-
-function profiles() {
-  global $BATCH_LIMIT;
-
-  $convertor = new Convertor($BATCH_LIMIT);
-  $convertor->convertProfiles();
-}
-
-function score_source_contacts() {
-  global $BATCH_LIMIT;
-
-  $scoreGenerator = new SourceContactScoreGenerator($BATCH_LIMIT);
-  $scoreGenerator->validateAllContacts();
-
-
-  $logger = new SourceContactLogger();
-  $logger->printStats();
-}
-
-function mark_duplicates() {
-  global $BATCH_LIMIT;
-
-  $duplicateFinder = new SourceContactDuplicateFinder();
-  $duplicateFinder->markMainContacts();
-
-  $scoreGenerator = new SourceContactScoreGenerator($BATCH_LIMIT);
-  $scoreGenerator->validateEmployers();
-
-  $logger = new SourceContactLogger();
-  $logger->printStats();
-}
-
-function convert_contacts() {
-  global $BATCH_LIMIT;
-
-  $convertor = new Convertor($BATCH_LIMIT);
-  $convertor->convertContacts(FALSE);
-}
-
-function convert_profiles() {
-  $convertor = new Convertor();
-  $convertor->convertProfiles();
-}
-
-function convert_relationships() {
-  global $BATCH_LIMIT;
-
-  $convertor = new Convertor($BATCH_LIMIT);
-  $convertor->convertRelationships();
-}
-
-function convert_groups() {
-  global $BATCH_LIMIT;
-
-  $convertor = new Convertor($BATCH_LIMIT);
-  $convertor->convertGroups();
-}
-
-function convert_events() {
-  $convertor = new Convertor();
-  $convertor->convertEvents();
-  $convertor->convertRecurringEvents();
-}
-
-function convert_event_types_roles_status() {
-  $convertor = new Convertor();
-  $convertor->convertEventTypesRolesEtc();
-}
-
-function test_db() {
-  $pdo = SourceDB::getPDO();
-  $sql = "select count(*) num_contacts from civicrm_contact where is_deleted = 0";
-  $dao = $pdo->query($sql);
-  if ($row = $dao->fetch()) {
-    echo 'Number of contacts in source database: ' . $row['num_contacts'] . "\n";
-  }
-  else {
-    throw new \Exception("Cannot retrieve number of contacts in source database");
-  }
-
-  $numInTargetDB = CRM_Core_DAO::singleValueQuery($sql);
-  echo "Number of contacts in target database: $numInTargetDB\n";
 }
 
 function getTask() {
@@ -174,6 +122,21 @@ function isValidTask($task) {
   else {
     return FALSE;
   }
+}
+
+function test_db() {
+  $pdo = SourceDB::getPDO();
+  $sql = "select count(*) num_contacts from civicrm_contact where is_deleted = 0";
+  $dao = $pdo->query($sql);
+  if ($row = $dao->fetch()) {
+    echo 'Number of contacts in source database: ' . $row['num_contacts'] . "\n";
+  }
+  else {
+    throw new \Exception("Cannot retrieve number of contacts in source database");
+  }
+
+  $numInTargetDB = CRM_Core_DAO::singleValueQuery($sql);
+  echo "Number of contacts in target database: $numInTargetDB\n";
 }
 
 function showUsageAndExit() {

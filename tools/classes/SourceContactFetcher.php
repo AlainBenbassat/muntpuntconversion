@@ -2,7 +2,7 @@
 
 class SourceContactFetcher {
 
-  public function getBatchAllContacts($startingContactId = 0, $numberOfContacts = 300) {
+  public function getAllContacts() {
     $pdo = SourceDB::getPDO();
 
     $sql = "
@@ -11,20 +11,16 @@ class SourceContactFetcher {
       FROM
         civicrm_contact
       where
-        id > $startingContactId
-      and
         is_deleted = 0
       order by
         id
-      limit
-        0,$numberOfContacts
     ";
     $dao = $pdo->query($sql);
 
     return $dao;
   }
 
-  public function getValidMainContacts($startingContactId = 0, $numberOfContacts = 300) {
+  public function getValidMainContacts() {
     $pdo = SourceDB::getPDO();
 
     $tableName = SourceContactLogger::LOG_TABLE_CONTACTS;
@@ -35,7 +31,6 @@ class SourceContactFetcher {
       FROM
         $tableName
       where
-        id > $startingContactId
       and
         is_main_contact = 1
       and
@@ -44,8 +39,6 @@ class SourceContactFetcher {
         contact_type in ('Individual', 'Organization')
       order by
         id
-      limit
-        0,$numberOfContacts
     ";
     $dao = $pdo->query($sql);
 
