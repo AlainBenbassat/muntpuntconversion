@@ -37,11 +37,16 @@ php tools/mpc_set_muntpunt_config.php
 
 ../vendor/totten/cv flush
 
+#=======================
+# Prepare the conversion
+#=======================
+php tools/mpc_convert.php score_source_contacts
+php tools/mpc_convert.php mark_duplicates
+php tools/mpc_convert.php clear_migration_ids
+
 #=====================
 # Start the conversion
 #=====================
-php tools/mpc_convert.php score_source_contacts
-php tools/mpc_convert.php mark_duplicates
 php tools/mpc_convert.php convert_profiles
 php tools/mpc_convert.php convert_campaigns
 php tools/mpc_convert.php convert_contacts

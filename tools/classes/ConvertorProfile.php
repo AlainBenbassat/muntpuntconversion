@@ -10,8 +10,6 @@ class ConvertorProfile {
   }
 
   public function run() {
-    TargetMigrationHelper::initialize();
-
     $dao = $this->profileFetcher->getProfilesToMigrate();
     while ($profile = $dao->fetch()) {
       $newProfileId = $this->targetProfile->create($profile);

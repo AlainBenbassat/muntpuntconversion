@@ -6,6 +6,7 @@ $validTasks = [
   'test_db' => '',
   'score_source_contacts' => 'ContactScore',
   'mark_duplicates' => 'ContactDuplicate',
+  'clear_migration_ids' => '',
   'convert_profiles' => 'ConvertorProfile',
   'convert_campaigns' => 'ConvertorCampaign',
   'convert_contacts' => 'ConvertorContact',
@@ -137,6 +138,10 @@ function test_db() {
 
   $numInTargetDB = CRM_Core_DAO::singleValueQuery($sql);
   echo "Number of contacts in target database: $numInTargetDB\n";
+}
+
+function clear_migration_ids() {
+  TargetMigrationHelper::initialize();
 }
 
 function showUsageAndExit() {
