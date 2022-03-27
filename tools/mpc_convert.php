@@ -117,7 +117,7 @@ function getTask() {
 function isValidTask($task) {
   global $validTasks;
 
-  if (in_array($task, $validTasks)) {
+  if (array_key_exists($task, $validTasks)) {
     return TRUE;
   }
   else {

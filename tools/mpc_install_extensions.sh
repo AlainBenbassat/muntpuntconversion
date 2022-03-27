@@ -54,7 +54,7 @@ installExtensionWithGit finsburypark https://lab.civicrm.org/extensions/finsbury
 installExtensionWithGit mosaicomsgtpl https://lab.civicrm.org/extensions/mosaicomsgtpl.git
 installExtensionWithGit prettyworkflowmessages https://lab.civicrm.org/extensions/prettyworkflowmessages.git
 installExtensionWithCv org.civicrm.recentmenu
-installExtensionWithCv dataprocessor
+#installExtensionWithCv dataprocessor
 #installExtensionWithGit dataprocessor-duplicatecontacts https://lab.civicrm.org/extensions/dataprocessor-duplicatecontacts.git
 
 "$CVCOMMAND" ext:upgrade-db
