@@ -85,7 +85,7 @@ function runClassTask($task) {
 function getClassOfTask($task) {
   global $validTasks;
 
-  return $validTasks['task'];
+  return $validTasks[$task];
 }
 
 function executeAllTasks() {
@@ -147,7 +147,7 @@ function clear_migration_ids() {
 function showUsageAndExit() {
   global $validTasks;
 
-  echo 'Please specify a valid task: {' . implode('|', $validTasks) . "}\n";
+  echo 'Please specify a valid task: {' . implode('|', array_keys($validTasks)) . "}\n";
   exit(1);
 }
 
