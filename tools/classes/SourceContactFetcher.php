@@ -111,6 +111,27 @@ class SourceContactFetcher {
     }
   }
 
+  public function getOtherAddresses($contactId, $mainStreetAddress) {
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      SELECT
+        *
+      FROM
+        civicrm_address
+      where
+        contact_id = $contactId
+      and
+        is_primary = 0
+      and
+        street_address <> ?
+    ";
+    $stmt = $pdo->prepare($sql);
+    $dao = $stmt->execute([$mainStreetAddress]);
+
+    return $dao;
+  }
+
   public function getEmployeeRelationships() {
     $pdo = SourceDB::getPDO();
 

@@ -38,8 +38,13 @@ class ConvertorContact {
     }
 
     if ($contactInfo['heeft_postadres']) {
-      $sourceAddress = $this->contactFetcher->getPrimaryAddress($contact['id']);
-      $this->targetAddress->create($newContactId, $sourceAddress);
+      $mainAddress = $this->contactFetcher->getPrimaryAddress($contact['id']);
+      $this->targetAddress->create($newContactId, $mainAddress);
+
+      $dao = $this->contactFetcher->getOtherAddresses($contact['id'], $mainAddress['street_address']);
+      while ($otherAddress = $dao->fetch()) {
+        $this->targetAddress->createOther($newContactId, $otherAddress);
+      }
     }
 
     if ($contactInfo['heeft_telefoonnummer']) {

@@ -18,8 +18,13 @@ class TargetEvent {
     unset($sourceEvent['created_id']);
     unset($sourceEvent['loc_block_id']);
     unset($sourceEvent['participant_listing_id']);
-    unset($sourceEvent['campaign_id']); // TIJDELIJK
     unset($sourceEvent['payment_processor']);
+
+
+    if ($this->isValidCampaignId($sourceEvent['campaign_id'])) {
+      unset($sourceEvent['campaign_id']);
+    }
+
 
     if ($sourceEvent['financial_type_id'] == 7) {
       $sourceEvent['financial_type_id'] = 4;
@@ -363,6 +368,20 @@ class TargetEvent {
       throw new Exception("Cannot find $customFieldName");
     }
 
+  }
+
+  private function isValidCampaignId($id) {
+    if (empty($id)) {
+      return TRUE;
+    }
+
+    $id = CRM_Core_DAO::singleValueQuery("select id from civcrm_campaign where id = $id");
+    if ($id) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
   }
 
 }

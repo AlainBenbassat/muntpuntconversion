@@ -31,6 +31,13 @@ function installExtensionConfigItems() {
   enableExtension civiconfig
 }
 
+function installExtensionMuntpuntConfig() {
+  installExtensionWithGit be.muntpunt.muntpuntconfig https://github.com/AlainBenbassat/be.muntpunt.muntpuntconfig.git
+  cd be.muntpunt.muntpuntconfig
+  git pull
+  cd ..
+}
+
 function installExtensionWithCv() {
   "$CVCOMMAND" ext:download -k $1
 
@@ -47,7 +54,7 @@ installExtensionConfigItems
 #installExtensionWithGit nz.co.fuzion.omnipaymultiprocessor https://github.com/eileenmcnaughton/nz.co.fuzion.omnipaymultiprocessor.git
 installExtensionWithCv uk.co.vedaconsulting.mosaico
 installExtensionWithGit de.systopia.identitytracker https://github.com/systopia/de.systopia.identitytracker.git
-installExtensionWithGit be.muntpunt.muntpuntconfig https://github.com/AlainBenbassat/be.muntpunt.muntpuntconfig.git
+installExtensionMuntpuntConfig
 installExtensionWithGit be.muntpunt.eventlist https://github.com/AlainBenbassat/be.muntpunt.eventlist.git
 installExtensionWithGit com.osseed.eventcalendar https://github.com/osseed/com.osseed.eventcalendar.git
 installExtensionWithGit finsburypark https://lab.civicrm.org/extensions/finsburypark.git

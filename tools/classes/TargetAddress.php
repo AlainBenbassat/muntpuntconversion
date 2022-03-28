@@ -1,11 +1,22 @@
 <?php
 
 class TargetAddress {
-  const DEFAULT_FIELDS_ADDRESS = ['street_address', 'postal_code', 'city', 'country_id', 'supplemental_address_1', 'supplemental_address_2', 'supplemental_address_3'];
+  const DEFAULT_FIELDS_ADDRESS = ['is_primary', 'street_address', 'postal_code', 'city', 'country_id', 'supplemental_address_1', 'supplemental_address_2', 'supplemental_address_3'];
   const LOCATION_TYPE_MAIN = 3;
+  const LOCATION_TYPE_PRIVE = 1;
+  const LOCATION_TYPE_REDACTIE = 4;
+
+  const ICONTACT_LT_STANDAARD = 1;
+  const ICONTACT_LT_PRIVE = 4;
+  const ICONTACT_LT_REDACTIE = 6;
 
   public function create($newContactId, $sourceAddress) {
     $params = $this->convertOldParamsToNewParams($newContactId, $sourceAddress);
+    civicrm_api3('Address', 'create', $params);
+  }
+
+  public function createOther($newContactId, $otherAddress) {
+    $params = $this->convertOldParamsToNewParams($newContactId, $otherAddress);
     civicrm_api3('Address', 'create', $params);
   }
 
@@ -52,8 +63,7 @@ class TargetAddress {
     ];
 
     $this->copyParams($address, $params, self::DEFAULT_FIELDS_ADDRESS);
-    $params['is_primary'] = 1;
-    $params['location_type_id'] = self::LOCATION_TYPE_MAIN;
+    $this->addLocationTypeParam($address['location_type_id'], $params);
 
     return $params;
   }
@@ -77,6 +87,18 @@ class TargetAddress {
   private function copyParams($fromParams, &$toParams, $fields) {
     foreach ($fields as $field) {
       $toParams[$field] = $fromParams[$field];
+    }
+  }
+
+  private function addLocationTypeParam($origLocationTypeId, &$params) {
+    if ($origLocationTypeId == self::ICONTACT_LT_STANDAARD) {
+      $params['location_type_id'] = self::LOCATION_TYPE_MAIN;
+    }
+    elseif ($origLocationTypeId == self::ICONTACT_LT_PRIVE) {
+      $params['location_type_id'] = self::LOCATION_TYPE_PRIVE;
+    }
+    elseif ($origLocationTypeId == self::ICONTACT_LT_REDACTIE) {
+      $params['location_type_id'] = self::LOCATION_TYPE_REDACTIE;
     }
   }
 }
