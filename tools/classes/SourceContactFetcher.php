@@ -31,7 +31,6 @@ class SourceContactFetcher {
       FROM
         $tableName
       where
-      and
         is_main_contact = 1
       and
         score = $score
