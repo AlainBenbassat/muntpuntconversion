@@ -2,31 +2,20 @@
 
 require 'common.php';
 require 'classes/SourceDB.php';
+require 'classes/SourceCustomDataFetcher.php';
 
 $fp = null;
 
 function main() {
+  $sourceCustomData = new SourceCustomDataFetcher();
+
   bootstrapCiviCRM();
 
-  $optionGroups = [
-    263 => 'Doelgroep',
-    267 => 'Taal',
-    361 => 'Evenement status',
-    519 => 'Muntpunt zalen',
-    271 => 'Gevoerde promotie',
-    269 => 'Kernfunctie',
-    273 => 'Activiteitensoort',
-    275 => 'Doelstelling',
-    277 => 'Soorten doelgroepen',
-  ];
-  exportOptionGroups($optionGroups);
+  $customGroups = $sourceCustomData->getCustomGroupsToMigrate();
+  $optionGroups = $sourceCustomData->getOptionGroupsFromCustomGroups();
 
-  $groups = [
-    'private_extraevent' => 'Evenement extra info',
-    'Private_event_info' => 'Evenement planning',
-    'Private_Bios' =>'Evenement BIOS',
-  ];
-  exportCustomGroups($groups, $optionGroups);
+  exportOptionGroups($optionGroups);
+  exportCustomGroups($customGroups, $optionGroups);
 }
 
 function exportOptionGroups($groups) {
@@ -61,8 +50,8 @@ function exportOptionValues($optionGroupId, $title) {
 
 
   $pdo = SourceDB::getPDO();
-  $sql = "select * from civicrm_option_value where option_group_id = $optionGroupId order by weight";
-  $numValues = getSingleVal("select count(*) from civicrm_option_value where option_group_id = $optionGroupId");
+  $sql = "select * from civicrm_option_value where option_group_id = $optionGroupId  and is_active = 1 order by weight";
+  $numValues = getSingleVal("select count(*) from civicrm_option_value where option_group_id = $optionGroupId and is_active = 1");
   $dao = $pdo->query($sql);
   $i = 1;
   while ($optionValue = $dao->fetch()) {
@@ -85,17 +74,17 @@ function exportOptionValues($optionGroupId, $title) {
   logLine("    }");
 }
 
-function exportCustomGroups($groups, $optionGroups) {
+function exportCustomGroups($customGroups, $optionGroups) {
   openLogFile('custom_groups.json');
   logLine("{\n");
   logLine("  \"entity\": \"CustomGroup\",\n");
   logLine("  \"data\": {\n");
 
   $i = 1;
-  $numGroups = count($groups);
+  $numGroups = count($customGroups);
   $weight = 1;
-  foreach ($groups as $customGroupOldName => $customGroupNewName) {
-    exportCustomGroup($customGroupOldName, $customGroupNewName, $optionGroups, $weight);
+  foreach ($customGroups as $customGroupId => $customGroupNewName) {
+    exportCustomGroup($customGroupId, $customGroupNewName, $optionGroups, $weight);
 
     addNewLineAndOrComma($i, $numGroups);
     $weight++;
@@ -106,7 +95,7 @@ function exportCustomGroups($groups, $optionGroups) {
   closeLogFile();
 }
 
-function exportCustomGroup($customGroupOldName, $customGroupNewName, $optionGroups, $weight) {
+function exportCustomGroup($customGroupId, $customGroupNewName, $optionGroups, $weight) {
   $name = convertName($customGroupNewName);
 
   logLine("    \"$name\": {\n");
@@ -120,18 +109,19 @@ function exportCustomGroup($customGroupOldName, $customGroupNewName, $optionGrou
   logLine("      \"collapse_display\": \"0\",\n");
   logLine("      \"table_name\": \"civicrm_value_$name\",\n");
   logLine("      \"weight\": \"$weight\",\n");
+  logLine("      \"help_post\": \"$customGroupId\",\n"); // we store the old id here
   logLine("      \"fields\": {\n");
 
-  exportCustomFields($customGroupOldName, $optionGroups);
+  exportCustomFields($customGroupId, $optionGroups);
 
   logLine("      }\n");
   logLine("    }");
 }
 
-function exportCustomFields($customGroupOldName, $optionGroups) {
+function exportCustomFields($customGroupId, $optionGroups) {
   $pdo = SourceDB::getPDO();
-  $sql = "select * from civicrm_custom_field where custom_group_id in (select id from civicrm_custom_group where name = '$customGroupOldName') order by weight";
-  $numValues = getSingleVal("select count(*) from civicrm_custom_field where custom_group_id in (select id from civicrm_custom_group where name = '$customGroupOldName')");
+  $sql = "select * from civicrm_custom_field where custom_group_id = $customGroupId and is_active = 1 order by weight";
+  $numValues = getSingleVal("select count(*) from civicrm_custom_field where custom_group_id = $customGroupId  and is_active = 1");
   $dao = $pdo->query($sql);
   $i = 1;
   while ($customField = $dao->fetch()) {
@@ -154,7 +144,9 @@ function exportCustomFields($customGroupOldName, $optionGroups) {
       logLine("          \"option_group\": \"" . convertOptionGroupIdToName($customField['option_group_id'], $optionGroups) . "\",\n");
     }
 
+    logLine("          \"help_post\": \"" . $customField['id'] . "\",\n"); // we store the old id here
     logLine("          \"weight\": \"" . $i . "\"\n");
+
 
     logLine("        }");
     addNewLineAndOrComma($i, $numValues);
@@ -166,20 +158,28 @@ function convertName($s) {
     $s = 'Organisator';
   }
 
-  $s = trim(strtolower($s));
+  $s = strtolower($s);
+  $s = str_replace('?', '', $s);
   $s = str_replace(' ', '_', $s);
+  $s = str_replace(',', '_', $s);
+  $s = str_replace('/', '_', $s);
+  $s = str_replace('__', '_', $s);
+  $s = rtrim($s, '_');
 
-  return $s;
+  return trim($s);
 }
 
 function convertColumnName($s) {
-  $s = trim(preg_replace('/_[0-9]+$/', '', $s));
+  $s = preg_replace('/_[0-9]+$/', '', $s);
+  $s = str_replace('/', '_', $s);
+  $s = str_replace('__', '_', $s);
+  $s = rtrim($s, '_');
 
   if ($s == 'organizer') {
     $s = 'organisator';
   }
 
-  return $s;
+  return trim($s);
 }
 
 function convertDefaultValue($s) {
@@ -196,7 +196,7 @@ function convertOptionGroupIdToName($optionGroupId, $optionGroups) {
   }
 
   if (!array_key_exists($optionGroupId, $optionGroups)) {
-    throw new Exception("Cannot find $optionGroupId");
+    throw new Exception("Cannot find option group with id = $optionGroupId in option group array");
   }
   $title = $optionGroups[$optionGroupId];
   return convertName($title);
@@ -233,6 +233,7 @@ function logLine($s) {
 function openLogFile($fileName) {
   global $fp;
   $fp = fopen("/home/alain/public_html/muntpunt/web/sites/default/files/civicrm/ext/be.muntpunt.muntpuntconfig/resources/$fileName", 'w');
+  //$fp = fopen('php://stdout', 'w');
 }
 
 function closeLogFile() {
@@ -241,3 +242,26 @@ function closeLogFile() {
 }
 
 main();
+
+/*
+OLD STUFF - to remove when above works
+
+  $optionGroups = [
+    263 => 'Doelgroep',
+    267 => 'Taal',
+    361 => 'Evenement status',
+    519 => 'Muntpunt zalen',
+    271 => 'Gevoerde promotie',
+    269 => 'Kernfunctie',
+    273 => 'Activiteitensoort',
+    275 => 'Doelstelling',
+    277 => 'Soorten doelgroepen',
+  ];
+
+  $groups = [
+    'private_extraevent' => 'Evenement extra info',
+    'Private_event_info' => 'Evenement planning',
+    'Private_Bios' =>'Evenement BIOS',
+  ];
+
+ */

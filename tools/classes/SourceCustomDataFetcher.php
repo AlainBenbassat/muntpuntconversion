@@ -1,7 +1,86 @@
 <?php
 
 class SourceCustomDataFetcher {
-  public function getCustomDataGroup($customGroupName) {
+  private $allCustomGroupsToMigrate;
+
+  public function __construct() {
+    $this->allCustomGroupsToMigrate =
+      $this->getCustomGroupsForContacts() +
+      $this->getCustomGroupsForEvents() +
+      $this->getCustomGroupsForParticipants();
+  }
+
+  public function getCustomGroupsForContacts() {
+    return [
+      4 => 'Diensten en Producten',
+      12 => 'Media info',
+      17 => 'Muntpunt Medewerker type',
+      19 => 'Ouder/Voogd Contact',
+      21 => 'BTW Info',
+      25 => 'Overheid Organisatie Type',
+      27 => 'Leverancier Organisatie Type',
+      29 => 'Partner Organisatie Type',
+      31 => 'Overheid Medewerker',
+      37 => 'Leverancier Medewerker Profiel',
+      45 => 'Departement',
+      47 => 'Abonnementen',
+      71 => 'Muntpunt Vrijwilliger Type',
+    ];
+  }
+
+  public function getCustomGroupsForEvents() {
+    return [
+      109 => 'Extra Evenement info',
+      115 => 'Evenement planning, memo, overleg en statistiek',
+      117 => 'Bios',
+    ];
+  }
+
+  public function getCustomGroupsForParticipants() {
+    return [
+      175 => 'Bijkomende informatie',
+      177 => 'Netflix',
+    ];
+  }
+
+  public function getCustomGroupsToMigrate() {
+    return $this->allCustomGroupsToMigrate;
+  }
+
+  public function getOptionGroupsFromCustomGroups() {
+    $customGroupIds = implode(', ', array_keys($this->allCustomGroupsToMigrate));
+    $pdo = SourceDB::getPDO();
+    $sql = "
+    select
+      og.id,
+      og.title
+    from
+      civicrm_option_group og
+    where
+      og.id in (
+        select
+          cf.option_group_id
+        from
+          civicrm_custom_field cf
+        where
+          cf.custom_group_id in ($customGroupIds)
+        and
+          cf.is_active = 1
+        and
+          cf.option_group_id is not null
+      )
+    ";
+    $dao = $pdo->query($sql);
+
+    $optionGroups = [];
+    while ($optionGroup = $dao->fetch()) {
+      $optionGroups[$optionGroup['id']] = $optionGroup['title'];
+    }
+
+    return $optionGroups;
+  }
+
+  public function getCustomDataOfContact($contactId) {
     $pdo = SourceDB::getPDO();
 
     $sql = "
@@ -18,79 +97,4 @@ class SourceCustomDataFetcher {
     return $dao->fetch();
   }
 
-  public function getCustomGroupOptionGroups($customGroupName) {
-    $pdo = SourceDB::getPDO();
-
-    $sql = "
-      select
-        distinct cf.option_group_id
-      from
-        civicrm_custom_group cg
-      inner join
-        civicrm_custom_field cf on cf.custom_group_id = cg.id
-      where
-        cg.name = '$customGroupName'
-      and
-        cf.option_group_id is not null
-    ";
-
-    $dao = $pdo->query($sql);
-
-    return $dao;
-  }
-
-  public function getOptionGroupDetails($optionGroupId) {
-    $pdo = SourceDB::getPDO();
-
-    $sql = "
-      select
-        id,
-        name,
-        title
-      from
-        civicrm_option_group
-      where
-        id = $optionGroupId
-    ";
-
-    $dao = $pdo->query($sql);
-
-    $row = $dao->fetch();
-
-    return [$row['id'], $row['name'], $row['title']];
-  }
-
-  public function getOptionValues($optionGroupId) {
-    $pdo = SourceDB::getPDO();
-
-    $sql = "
-      select
-        *
-      from
-        civicrm_option_value
-      where
-        option_group_id = $optionGroupId
-    ";
-
-    $dao = $pdo->query($sql);
-
-    return $dao;
-  }
-
-  public function getCustomFields($customGroupId) {
-    $pdo = SourceDB::getPDO();
-
-    $sql = "
-      select
-        *
-      from
-        civicrm_custom_field
-      where
-        custom_group_id = $customGroupId
-    ";
-
-    $dao = $pdo->query($sql);
-
-    return $dao;
-  }
 }

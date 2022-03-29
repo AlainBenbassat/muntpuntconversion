@@ -2,6 +2,7 @@
 
 class ConvertorContact {
   private $contactFetcher;
+  private $customDataFetcher;
   private $targetContact;
   private $targetAddress;
   private $targetEmail;
@@ -9,6 +10,7 @@ class ConvertorContact {
 
   public function __construct() {
     $this->contactFetcher = new SourceContactFetcher();
+    $this->customDataFetcher = new SourceCustomDataFetcher();
     $this->targetContact = new TargetContact();
     $this->targetAddress = new TargetAddress();
     $this->targetEmail = new TargetEmail();
@@ -19,6 +21,7 @@ class ConvertorContact {
     $dao = $this->contactFetcher->getValidMainContacts();
     while ($mainContactInfo = $dao->fetch()) {
       $newMainContactId = $this->processMainContact($mainContactInfo);
+      $this->processMainContactCustomFields($mainContactInfo['id'], $newMainContactId);
 
       $daoDupes = $this->contactFetcher->getDuplicateContacts($mainContactInfo['id']);
       while ($duplicateContactInfo = $daoDupes->fetch()) {
@@ -74,6 +77,13 @@ class ConvertorContact {
         $this->targetPhone->merge($mainContactId, $sourcePhones);
       }
     }
+  }
+
+  private function processMainContactCustomFields($oldMainContactId, $newMainContactId) {
+    // haal alle custom group rubrieken op gelinkt aan contacten
+    // kijk of die ingevuld zijn voor dit contact
+
+
   }
 
 }
