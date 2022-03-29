@@ -82,7 +82,10 @@ class ConvertorContact {
   private function processMainContactCustomFields($oldMainContactId, $newMainContactId) {
     // haal alle custom group rubrieken op gelinkt aan contacten
     // kijk of die ingevuld zijn voor dit contact
-
+    $customGroups = $this->customDataFetcher->getCustomGroupsForContacts();
+    foreach ($customGroups as $customGroupId => $customGroupName) {
+      $this->customDataFetcher->getCustomDataOfContact($oldMainContactId, $customGroupId);
+    }
 
   }
 

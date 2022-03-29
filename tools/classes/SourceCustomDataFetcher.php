@@ -2,6 +2,7 @@
 
 class SourceCustomDataFetcher {
   private $allCustomGroupsToMigrate;
+  private $tableNames;
 
   public function __construct() {
     $this->allCustomGroupsToMigrate =
@@ -80,16 +81,23 @@ class SourceCustomDataFetcher {
     return $optionGroups;
   }
 
-  public function getCustomDataOfContact($contactId) {
+  public function getCustomDataOfContact($contactId, $customGroupId) {
+    /*
+     moet een array teruggeven met
+      customfieldID => customfieldwaarde
+
+     in het targetcustomdata object, zet ik die field id om naar de nieuwe (oude zit in help_post)
+     */
+    $tableName = $this->getTableNameFromCustomGroupId($customGroupId);
     $pdo = SourceDB::getPDO();
 
     $sql = "
       select
         *
       from
-        civicrm_custom_group
+        $tableName
       where
-        name = '$customGroupName'
+        entity_id = $contactId
     ";
 
     $dao = $pdo->query($sql);
@@ -97,4 +105,32 @@ class SourceCustomDataFetcher {
     return $dao->fetch();
   }
 
+  private function getTableNameFromCustomGroupId($customGroupId) {
+    if (empty($this->tableNames)) {
+      $this->fillTableNames();
+    }
+
+    return $this->tableNames[$customGroupId];
+  }
+
+  private function fillTableNames() {
+    $customGroupIds = implode(', ', array_keys($this->allCustomGroupsToMigrate));
+
+    $pdo = SourceDB::getPDO();
+
+    $sql = "
+      select
+        id, table_name
+      from
+        civicrm_custom_group
+      where
+        id in ($customGroupIds)
+    ";
+
+    $dao = $pdo->query($sql);
+
+    while ($customGroup = $dao->fetch()) {
+      $this->tableNames[$dao['id']] = $dao['table_name'];
+    }
+  }
 }
