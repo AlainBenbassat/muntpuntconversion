@@ -111,7 +111,7 @@ class SourceCustomDataFetcher {
     $data = $this->getCustomData($contactId, $this->customDataDefinition[$customGroupId]['table_name']);
 
     foreach ($this->customDataDefinition[$customGroupId]['fields'] as $fieldId => $fieldName) {
-      $customDataSet[$fieldId] = $data ? $data->$fieldName : '';
+      $customDataSet[$fieldId] = $data ? $data[$fieldName] : '';
     }
 
     return $customDataSet;
