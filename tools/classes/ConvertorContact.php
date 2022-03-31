@@ -7,6 +7,7 @@ class ConvertorContact {
   private $targetAddress;
   private $targetEmail;
   private $targetPhone;
+  private $targetCustomData;
 
   public function __construct() {
     $this->contactFetcher = new SourceContactFetcher();
@@ -15,6 +16,7 @@ class ConvertorContact {
     $this->targetAddress = new TargetAddress();
     $this->targetEmail = new TargetEmail();
     $this->targetPhone = new TargetPhone();
+    $this->targetCustomData = new TargetCustomData();
   }
 
   public function run() {
@@ -80,13 +82,11 @@ class ConvertorContact {
   }
 
   private function processMainContactCustomFields($oldMainContactId, $newMainContactId) {
-    // haal alle custom group rubrieken op gelinkt aan contacten
-    // kijk of die ingevuld zijn voor dit contact
     $customGroups = $this->customDataFetcher->getCustomGroupsForContacts();
     foreach ($customGroups as $customGroupId => $customGroupName) {
-      $this->customDataFetcher->getCustomDataOfContact($oldMainContactId, $customGroupId);
+      $customDataSet = $this->customDataFetcher->getCustomDataSetOfContact($oldMainContactId, $customGroupId);
+      $this->targetCustomData->create($newMainContactId, $customDataSet);
     }
-
   }
 
 }
