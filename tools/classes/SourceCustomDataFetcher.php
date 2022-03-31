@@ -99,7 +99,7 @@ class SourceCustomDataFetcher {
       $customDataSet[$fieldId] = $data ? $data->$fieldName : '';
     }
 
-    return $data;
+    return $data['fields'];
   }
 
   private function loadCustomGroupDefinition($customGroupId) {
