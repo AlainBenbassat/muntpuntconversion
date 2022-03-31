@@ -100,10 +100,21 @@ function exportCustomGroup($customGroupId, $customGroupNewName, $optionGroups, $
   $customGroupDetails = $sourceCustomData->getCustomGroupDetails($customGroupId);
   $name = convertName($customGroupNewName);
 
+  if ($customGroupId == 4) {
+    $extendsEntity = "perspartner";
+  }
+  elseif ($customGroupId == 12) {
+    $extendsEntity = "persmedewerker";
+  }
+  else {
+    $extendsEntity = '';
+  }
+
   logLine("    \"$name\": {\n");
   logLine("      \"name\": \"$name\",\n");
   logLine("      \"title\": \"$customGroupNewName\",\n");
   logLine("      \"extends\": \"" . $customGroupDetails['extends'] . "\",\n");
+  logLine("      \"extends_entity_column_value\": \"$extendsEntity\",\n");
   logLine("      \"is_reserved\": \"0\",\n");
   logLine("      \"is_active\": \"1\",\n");
   logLine("      \"is_public\": \"0\",\n");

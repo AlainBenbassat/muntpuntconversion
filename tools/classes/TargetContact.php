@@ -70,7 +70,20 @@ class TargetContact {
       $this->copyParams($contact, $params, self::DEFAULT_FIELDS_ORGANIZATION);
     }
 
+    $this->copySubType($contact, $params);
+
     return $params;
+  }
+
+  private function copySubType($contact, &$params) {
+    if (!empty($contact['contact_sub_type'])) {
+      if (in_array('Partner', $contact['contact_sub_type'])) {
+        $params['contact_sub_type'] = ['Perspartner'];
+      }
+      elseif (in_array('Pers_Medewerker', $contact['contact_sub_type'])) {
+        $params['contact_sub_type'] = ['Persmedewerker'];
+      }
+    }
   }
 
   private function copyParams($fromParams, &$toParams, $fields) {
