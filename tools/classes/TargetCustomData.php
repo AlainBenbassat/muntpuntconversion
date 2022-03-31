@@ -17,13 +17,12 @@ class TargetCustomData {
 
   private function getCustomFieldIdFromOldId($oldCustomFieldId) {
     if (empty($this->idMapper[$oldCustomFieldId])) {
-      $pdo = SourceDB::getPDO();
       $sql = "select id from civicrm_custom_field where help_post = '$oldCustomFieldId'";
-      $field = $pdo->query($sql)->fetchColumn();
+      $field = CRM_Core_DAO::singleValueQuery($sql);
       if (!$field) {
         throw new Exception("Cannot map old custom field id = $oldCustomFieldId to new value");
       }
-      $this->idMapper[$oldCustomFieldId] = $field['id'];
+      $this->idMapper[$oldCustomFieldId] = $field;
     }
 
     return $this->idMapper[$oldCustomFieldId];
