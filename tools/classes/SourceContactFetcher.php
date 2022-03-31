@@ -125,8 +125,8 @@ class SourceContactFetcher {
       and
         street_address <> ?
     ";
-    $stmt = $pdo->prepare($sql);
-    $dao = $stmt->execute([$mainStreetAddress]);
+    $dao = $pdo->prepare($sql);
+    $dao->execute([$mainStreetAddress]);
 
     return $dao;
   }
