@@ -21,7 +21,7 @@ class ConvertorEvent {
   public function convertEvents() {
     $dao = $this->eventFetcher->getAllEventsToMigrate();
     while ($sourceEvent = $dao->fetch()) {
-      echo 'Converting event ' . $sourceEvent['title'] . '(' . $sourceEvent['start_date'] . ")...\n";
+      echo 'Converting event ' . $sourceEvent['title'] . ' (' . $sourceEvent['start_date'] . ")...\n";
 
       $newEventId = $this->targetEvent->create($sourceEvent);
 

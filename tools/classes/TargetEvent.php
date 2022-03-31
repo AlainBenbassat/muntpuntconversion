@@ -375,7 +375,7 @@ class TargetEvent {
       return TRUE;
     }
 
-    $id = CRM_Core_DAO::singleValueQuery("select id from civcrm_campaign where id = $id");
+    $id = CRM_Core_DAO::singleValueQuery("select id from civicrm_campaign where id = $id");
     if ($id) {
       return TRUE;
     }
