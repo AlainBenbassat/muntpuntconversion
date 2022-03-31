@@ -38,6 +38,19 @@ mysqldump  --defaults-file="$REMOTE_ICONTACT_CREDENTIALS" -h 172.25.17.2 -P 3307
   civicrm_uf_field \
   civicrm_uf_join \
   civicrm_recurring_entity \
+  civicrm_value_diensten_en_producten_4 \
+  civicrm_value_media_info_12 \
+  civicrm_value_medewerker_type_17 \
+  civicrm_value_verantwoordelijke_19 \
+  civicrm_value_organisatie_21 \
+  civicrm_value_overheid_type_25 \
+  civicrm_value_leverancier_type_27 \
+  civicrm_value_partner_type_29 \
+  civicrm_value_overheid_medewerker_profiel_31 \
+  civicrm_value_leverancier_medewerker_type_37 \
+  civicrm_value_departement_45 \
+  civicrm_value_abonnementen_47 \
+  civicrm_value_muntpunt_vrijwilliger_type_71 \
   civicrm_value_evenet_doelpgroep_109 \
   civicrm_value_private_event_info_115 \
   civicrm_value_private_bios_117 \
