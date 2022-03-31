@@ -49,6 +49,21 @@ class SourceCustomDataFetcher {
     return $this->allCustomGroupsToMigrate;
   }
 
+  public function getCustomGroupDetails($customGroupId) {
+    $pdo = SourceDB::getPDO();
+    $sql = "
+    select
+      *
+    from
+      civicrm_custom_group
+    where
+      id = $customGroupId
+    ";
+    $dao = $pdo->query($sql);
+
+    return $dao->fetch();
+  }
+
   public function getOptionGroupsFromCustomGroups() {
     $customGroupIds = implode(', ', array_keys($this->allCustomGroupsToMigrate));
     $pdo = SourceDB::getPDO();
@@ -99,7 +114,7 @@ class SourceCustomDataFetcher {
       $customDataSet[$fieldId] = $data ? $data->$fieldName : '';
     }
 
-    return $data['fields'];
+    return $customDataSet;
   }
 
   private function loadCustomGroupDefinition($customGroupId) {

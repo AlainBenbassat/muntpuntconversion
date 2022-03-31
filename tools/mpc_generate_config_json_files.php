@@ -96,12 +96,14 @@ function exportCustomGroups($customGroups, $optionGroups) {
 }
 
 function exportCustomGroup($customGroupId, $customGroupNewName, $optionGroups, $weight) {
+  $sourceCustomData = new SourceCustomDataFetcher();
+  $customGroupDetails = $sourceCustomData->getCustomGroupDetails($customGroupId);
   $name = convertName($customGroupNewName);
 
   logLine("    \"$name\": {\n");
   logLine("      \"name\": \"$name\",\n");
   logLine("      \"title\": \"$customGroupNewName\",\n");
-  logLine("      \"extends\": \"Event\",\n");
+  logLine("      \"extends\": \"" . $customGroupDetails['extends'] . "\",\n");
   logLine("      \"is_reserved\": \"0\",\n");
   logLine("      \"is_active\": \"1\",\n");
   logLine("      \"is_public\": \"0\",\n");
