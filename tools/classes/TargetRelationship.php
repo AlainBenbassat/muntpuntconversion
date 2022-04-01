@@ -9,7 +9,7 @@ class TargetRelationship {
         $params = $this->convertOldParamsToNewParams($employeeRelationship, $newContactIdA, $newContactIdB);
         civicrm_api3('Relationship', 'create', $params);
 
-        \Civi\Api4\Contact::update()
+        \Civi\Api4\Contact::update(FALSE)
           ->addValue('employer_id', $newContactIdB)
           ->addWhere('id', '=', $newContactIdA)
           ->execute();
