@@ -66,7 +66,14 @@ class ConvertorEvent {
     while ($sourceParticipant = $dao->fetch()) {
       echo '  Converting participant ' . $sourceParticipant['id'] . "...\n";
 
-      $this->targetEvent->createParticipant($newEventId, $sourceParticipant);
+      $oldParticipantId = $sourceParticipant['id'];
+      $newParticipantId = $this->targetEvent->createParticipant($newEventId, $sourceParticipant);
+
+      $customGroups = $this->customDataFetcher->getCustomGroupsForParticipants();
+      foreach ($customGroups as $customGroupId => $customGroupName) {
+        $customDataSet = $this->customDataFetcher->getCustomDataSetOfEntity($oldParticipantId, $customGroupId);
+        $this->targetCustomData->create($newParticipantId, $customDataSet);
+      }
     }
   }
 

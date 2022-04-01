@@ -2,9 +2,11 @@
 
 class TargetProfile {
   private $targetMigrationHelper;
+  private $targetCustomData;
 
   public function __construct() {
     $this->targetMigrationHelper = new TargetMigrationHelper();
+    $this->targetCustomData = new TargetCustomData();
   }
 
   public function create($profile) {
@@ -40,6 +42,11 @@ class TargetProfile {
   }
 
   public function createField($newProfileId, $field) {
+    if ($oldCustomFieldId = $this->targetCustomData->isCustomFieldName($field['field_name'])) {
+      $newCustomFieldId = $this->targetCustomData->getCustomFieldIdFromOldId($oldCustomFieldId);
+      $field['field_name'] = "custom_$newCustomFieldId";
+    }
+
     // api3 and api4 give error!
     $columnSpecs = [
       'uf_group_id' => 'Integer',

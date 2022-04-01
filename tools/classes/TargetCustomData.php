@@ -37,7 +37,7 @@ class TargetCustomData {
     return $this->cacheIsContactReferenceField[$newCustomFieldId];
   }
 
-  private function getCustomFieldIdFromOldId($oldCustomFieldId) {
+  public function getCustomFieldIdFromOldId($oldCustomFieldId) {
     if (empty($this->oldCustomFieldIdIsNewCustomFieldId[$oldCustomFieldId])) {
       $sql = "select id from civicrm_custom_field where help_post = '$oldCustomFieldId'";
       $field = CRM_Core_DAO::singleValueQuery($sql);
@@ -48,6 +48,15 @@ class TargetCustomData {
     }
 
     return $this->oldCustomFieldIdIsNewCustomFieldId[$oldCustomFieldId];
+  }
+
+  public function isCustomFieldName($fieldName) {
+    if (strpos($fieldName, 'custom_') === FALSE) {
+      return FALSE;
+    }
+    else {
+      return TRUE;
+    }
   }
 
 

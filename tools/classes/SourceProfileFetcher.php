@@ -38,7 +38,7 @@ class SourceProfileFetcher {
       where
         uf_group_id = $profileId
       and
-        field_name not like 'custom_%'
+        is_active = 1
     ";
 
     $dao = $pdo->query($sql);

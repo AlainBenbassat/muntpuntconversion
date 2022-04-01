@@ -113,6 +113,8 @@ class TargetEvent {
     $result = civicrm_api3('Participant', 'create', $sourceParticipant);
     $newParticipantId = $result['values'][0]['id'];
     $this->targetMigrationHelper->storeIds('civicrm_participant', $oldParticipantId, $newParticipantId);
+
+    return $newParticipantId;
   }
 
   private function isParticipantRegistered($newEventId, $newContactId) {
