@@ -20,11 +20,9 @@ class TargetEvent {
     unset($sourceEvent['participant_listing_id']);
     unset($sourceEvent['payment_processor']);
 
-
-    if ($this->isValidCampaignId($sourceEvent['campaign_id'])) {
+    if (!$this->isValidCampaignId($sourceEvent['campaign_id'])) {
       unset($sourceEvent['campaign_id']);
     }
-
 
     if ($sourceEvent['financial_type_id'] == 7) {
       $sourceEvent['financial_type_id'] = 4;
@@ -81,14 +79,15 @@ class TargetEvent {
     }
   }
 
-  public function createParticipant($newEventId, $newContactId, $sourceParticipant) {
+  public function createParticipant($newEventId, $sourceParticipant) {
+    $newContactId = TargetContactFinder::getContactIdByOldContactId($sourceParticipant['contact_id']);
+
     if ($this->isParticipantRegistered($newEventId, $newContactId)) {
       return;
     }
 
     $oldParticipantId = $sourceParticipant['id'];
     unset($sourceParticipant['id']);
-    unset($sourceParticipant['campaign_id']); // TIJDELIJK
     $sourceParticipant['event_id'] = $newEventId;
     $sourceParticipant['contact_id'] = $newContactId;
     $sourceParticipant['sequential'] = 1;

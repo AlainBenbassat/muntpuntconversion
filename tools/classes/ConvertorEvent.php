@@ -63,10 +63,7 @@ class ConvertorEvent {
     while ($sourceParticipant = $dao->fetch()) {
       echo '  Converting participant ' . $sourceParticipant['id'] . "...\n";
 
-      $newContactId = TargetContactFinder::getContactIdByOldContactId($sourceParticipant['contact_id']);
-      if ($newEventId) {
-        $this->targetEvent->createParticipant($newEventId, $newContactId, $sourceParticipant);
-      }
+      $this->targetEvent->createParticipant($newEventId, $sourceParticipant);
     }
   }
 
