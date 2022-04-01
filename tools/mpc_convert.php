@@ -141,7 +141,7 @@ function test_db() {
 }
 
 function clear_migration_ids() {
-  TargetMigrationHelper::initialize();
+  TargetMigrationHelper::clearMappingOldIdNewId('all');
 }
 
 function showUsageAndExit() {

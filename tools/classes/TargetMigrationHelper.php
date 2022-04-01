@@ -13,7 +13,16 @@ class TargetMigrationHelper {
     $this->alternateIds['civicrm_loc_block'][443] = 73; // Stripmuseum Brussel
   }
 
-  public static function initialize() {
+  public static function clearMappingOldIdNewId($entity) {
+    if ($entity == 'all') {
+      self::recreateMigrationIdsTable();
+    }
+    else {
+      self::clearMappingOldIdNewIdForEntity($entity);
+    }
+  }
+
+  private static function recreateMigrationIdsTable() {
     CRM_Core_DAO::executeQuery("drop table if exists migration_ids");
     CRM_Core_DAO::executeQuery("
       create table migration_ids (
@@ -23,6 +32,10 @@ class TargetMigrationHelper {
          index migridx (entity, old_id, new_id)
       )
     ");
+  }
+
+  private static function clearMappingOldIdNewIdForEntity($entity) {
+    CRM_Core_DAO::executeQuery("delete from migration_ids where entity = '$entity'");
   }
 
   public function storeIds($entity, $oldId, $newId) {

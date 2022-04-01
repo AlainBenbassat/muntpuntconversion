@@ -17,6 +17,12 @@ tools/mpc_verify_location.sh
 tools/mpc_copy_icontact_database.sh
 [[ $? != 0 ]] && mpc_exit
 
+#=================================================================
+# Mark the contacts we will migrate in the local icontact database
+#=================================================================
+php tools/mpc_convert.php score_source_contacts
+php tools/mpc_convert.php mark_duplicates
+
 #================================
 # Restore the blank civi database
 #================================
@@ -40,8 +46,6 @@ php tools/mpc_set_muntpunt_config.php
 #=======================
 # Prepare the conversion
 #=======================
-php tools/mpc_convert.php score_source_contacts
-php tools/mpc_convert.php mark_duplicates
 php tools/mpc_convert.php clear_migration_ids
 
 #=====================

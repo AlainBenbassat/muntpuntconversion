@@ -84,7 +84,7 @@ class ConvertorContact {
   private function processMainContactCustomFields($oldMainContactId, $newMainContactId) {
     $customGroups = $this->customDataFetcher->getCustomGroupsForContacts();
     foreach ($customGroups as $customGroupId => $customGroupName) {
-      $customDataSet = $this->customDataFetcher->getCustomDataSetOfContact($oldMainContactId, $customGroupId);
+      $customDataSet = $this->customDataFetcher->getCustomDataSetOfEntity($oldMainContactId, $customGroupId);
       $this->targetCustomData->create($newMainContactId, $customDataSet);
     }
   }

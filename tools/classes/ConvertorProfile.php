@@ -10,6 +10,8 @@ class ConvertorProfile {
   }
 
   public function run() {
+    TargetMigrationHelper::clearMappingOldIdNewId('civicrm_uf_group');
+
     $dao = $this->profileFetcher->getProfilesToMigrate();
     while ($profile = $dao->fetch()) {
       $newProfileId = $this->targetProfile->create($profile);

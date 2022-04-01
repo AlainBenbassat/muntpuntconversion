@@ -98,17 +98,17 @@ class SourceCustomDataFetcher {
   }
 
   /**
-   * @param $contactId
+   * @param $entityId
    * @param $customGroupId
    *
-   * @return returns array with customfieldID => customfieldValue
+   * @return array with customfieldID => customfieldValue
    */
-  public function getCustomDataSetOfContact($contactId, $customGroupId) {
+  public function getCustomDataSetOfEntity($entityId, $customGroupId) {
     $customDataSet = [];
 
     $this->loadCustomGroupDefinition($customGroupId);
 
-    $data = $this->getCustomData($contactId, $this->customDataDefinition[$customGroupId]['table_name']);
+    $data = $this->getCustomData($entityId, $this->customDataDefinition[$customGroupId]['table_name']);
 
     foreach ($this->customDataDefinition[$customGroupId]['fields'] as $fieldId => $fieldName) {
       $customDataSet[$fieldId] = $data ? $data[$fieldName] : '';
