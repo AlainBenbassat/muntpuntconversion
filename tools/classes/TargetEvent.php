@@ -92,6 +92,10 @@ class TargetEvent {
     $sourceParticipant['contact_id'] = $newContactId;
     $sourceParticipant['sequential'] = 1;
 
+    if (!$this->isValidCampaignId($sourceParticipant['campaign_id'])) {
+      unset($sourceParticipant['campaign_id']);
+    }
+
     if ($sourceParticipant['status_id'] == 19) {
       $sourceParticipant['status_id'] = 1;
     }
