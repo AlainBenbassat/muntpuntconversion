@@ -1,12 +1,19 @@
 <?php
 
 class TargetCustomData {
-  private $idMapper = [];
+  private $oldCustomFieldIdIsNewCustomFieldId = [];
+  private $cacheIsContactReferenceField = [];
 
   public function create($entityId, $customDataSet) {
     foreach ($customDataSet as $oldCustomFieldId => $customValue) {
       if ($customValue) {
-        $customField = 'custom_' . $this->getCustomFieldIdFromOldId($oldCustomFieldId);
+        $newCustomFieldId = $this->getCustomFieldIdFromOldId($oldCustomFieldId);
+        $customField = "custom_$newCustomFieldId";
+
+        if ($this->isContactReferenceField($newCustomFieldId)) {
+          $customValue = TargetContactFinder::getContactIdByOldContactId($customValue);
+        }
+
         civicrm_api3('CustomValue', 'create', [
           'entity_id' => $entityId,
           $customField => $customValue,
@@ -15,17 +22,32 @@ class TargetCustomData {
     }
   }
 
+  private function isContactReferenceField($newCustomFieldId) {
+    if (!array_key_exists($newCustomFieldId, $this->cacheIsContactReferenceField)) {
+      $sql = "select data_type from civicrm_custom_field where id = $newCustomFieldId";
+      $dataType = CRM_Core_DAO::singleValueQuery($sql);
+      if ($dataType == 'ContactReference') {
+        $this->cacheIsContactReferenceField[$newCustomFieldId] = TRUE;
+      }
+      else {
+        $this->cacheIsContactReferenceField[$newCustomFieldId] = FALSE;
+      }
+    }
+
+    return $this->cacheIsContactReferenceField[$newCustomFieldId];
+  }
+
   private function getCustomFieldIdFromOldId($oldCustomFieldId) {
-    if (empty($this->idMapper[$oldCustomFieldId])) {
+    if (empty($this->oldCustomFieldIdIsNewCustomFieldId[$oldCustomFieldId])) {
       $sql = "select id from civicrm_custom_field where help_post = '$oldCustomFieldId'";
       $field = CRM_Core_DAO::singleValueQuery($sql);
       if (!$field) {
         throw new Exception("Cannot map old custom field id = $oldCustomFieldId to new value");
       }
-      $this->idMapper[$oldCustomFieldId] = $field;
+      $this->oldCustomFieldIdIsNewCustomFieldId[$oldCustomFieldId] = $field;
     }
 
-    return $this->idMapper[$oldCustomFieldId];
+    return $this->oldCustomFieldIdIsNewCustomFieldId[$oldCustomFieldId];
   }
 
 

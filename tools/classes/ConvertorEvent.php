@@ -46,20 +46,6 @@ class ConvertorEvent {
         $this->targetCustomData->create($newEventId, $customDataSet);
       }
 
-      /*
-      echo "  converting customfields extra info...\n";
-      $customFields = $this->eventFetcher->getEventCustomFields($sourceEvent['id'], 'private_extraevent');
-      $this->targetEvent->addCustomFieldsExtraInfo($newEventId, $customFields);
-
-      echo "  converting custom fields info...\n";
-      $customFields = $this->eventFetcher->getEventCustomFields($sourceEvent['id'], 'Private_event_info');
-      $this->targetEvent->addCustomFieldsInfo($newEventId, $customFields);
-
-      echo "  converting custom fields BIOS...\n";
-      $customFields = $this->eventFetcher->getEventCustomFields($sourceEvent['id'], 'Private_Bios');
-      $this->targetEvent->addCustomFieldsPrivateBIOS($newEventId, $customFields);
-      */
-
       echo "  converting profiles...\n";
       $this->convertEventProfiles($oldEventId, $newEventId);
 
