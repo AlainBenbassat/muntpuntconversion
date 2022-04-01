@@ -54,6 +54,8 @@ mysqldump  --defaults-file="$REMOTE_ICONTACT_CREDENTIALS" -h 172.25.17.2 -P 3307
   civicrm_value_evenet_doelpgroep_109 \
   civicrm_value_private_event_info_115 \
   civicrm_value_private_bios_117 \
+  civicrm_value_bijkomende_informatie_175 \
+  civicrm_value_netflix_177 \
 > ../tmp/icontact.sql
 
 [[ $? != 0 ]] && exit 1
