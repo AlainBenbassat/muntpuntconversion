@@ -42,7 +42,8 @@ class TargetProfile {
   }
 
   public function createField($newProfileId, $field) {
-    if ($oldCustomFieldId = $this->targetCustomData->isCustomFieldName($field['field_name'])) {
+    if ($this->targetCustomData->isCustomFieldName($field['field_name'])) {
+      $oldCustomFieldId = $this->targetCustomData->extractCustomFieldIdFromName($field['field_name']);
       $newCustomFieldId = $this->targetCustomData->getCustomFieldIdFromOldId($oldCustomFieldId);
       $field['field_name'] = "custom_$newCustomFieldId";
     }

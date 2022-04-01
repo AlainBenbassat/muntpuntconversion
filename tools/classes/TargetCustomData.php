@@ -59,5 +59,9 @@ class TargetCustomData {
     }
   }
 
+  public function extractCustomFieldIdFromName($fieldName) {
+    return str_replace('custom_', $fieldName);
+  }
+
 
 }
