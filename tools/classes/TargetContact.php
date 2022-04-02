@@ -80,12 +80,12 @@ class TargetContact {
       $subTypes = explode(CRM_Core_DAO::VALUE_SEPARATOR, $contact['contact_sub_type']);
       foreach ($subTypes as $subType) {
         if ($subType == 'Partner') {
-          $params['contact_sub_type'] = ['Perspartner'];
+          $params['contact_sub_type'] = 'Perspartner';
           return;
         }
 
         if ($subType == 'Pers_Medewerker') {
-          $params['contact_sub_type'] = ['Persmedewerker'];
+          $params['contact_sub_type'] = 'Persmedewerker';
           return;
         }
       }
