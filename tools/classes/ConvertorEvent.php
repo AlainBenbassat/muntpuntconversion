@@ -68,12 +68,17 @@ class ConvertorEvent {
 
       $oldParticipantId = $sourceParticipant['id'];
       $newParticipantId = $this->targetEvent->createParticipant($newEventId, $sourceParticipant);
-
-      $customGroups = $this->customDataFetcher->getCustomGroupsForParticipants();
-      foreach ($customGroups as $customGroupId => $customGroupName) {
-        $customDataSet = $this->customDataFetcher->getCustomDataSetOfEntity($oldParticipantId, $customGroupId);
-        $this->targetCustomData->create($newParticipantId, $customDataSet);
+      if ($newParticipantId) {
+        $this->convertParticipantCustomData($oldParticipantId, $newParticipantId);
       }
+    }
+  }
+
+  private function convertParticipantCustomData($oldParticipantId, $newParticipantId) {
+    $customGroups = $this->customDataFetcher->getCustomGroupsForParticipants();
+    foreach ($customGroups as $customGroupId => $customGroupName) {
+      $customDataSet = $this->customDataFetcher->getCustomDataSetOfEntity($oldParticipantId, $customGroupId);
+      $this->targetCustomData->create($newParticipantId, $customDataSet);
     }
   }
 
