@@ -77,11 +77,17 @@ class TargetContact {
 
   private function copySubType($contact, &$params) {
     if (!empty($contact['contact_sub_type'])) {
-      if (in_array('Partner', $contact['contact_sub_type'])) {
-        $params['contact_sub_type'] = ['Perspartner'];
-      }
-      elseif (in_array('Pers_Medewerker', $contact['contact_sub_type'])) {
-        $params['contact_sub_type'] = ['Persmedewerker'];
+      $subTypes = explode(CRM_Core_DAO::VALUE_SEPARATOR, $contact['contact_sub_type']);
+      foreach ($subTypes as $subType) {
+        if ($subType == 'Partner') {
+          $params['contact_sub_type'] = ['Perspartner'];
+          return;
+        }
+
+        if ($subType == 'Pers_Medewerker') {
+          $params['contact_sub_type'] = ['Persmedewerker'];
+          return;
+        }
       }
     }
   }
