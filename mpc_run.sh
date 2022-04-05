@@ -51,6 +51,8 @@ php tools/mpc_convert.php clear_migration_ids
 #=====================
 # Start the conversion
 #=====================
+tools/mpc_convert_message_templates.sh
+[[ $? != 0 ]] && mpc_exit
 php tools/mpc_convert.php convert_profiles
 php tools/mpc_convert.php convert_campaigns
 php tools/mpc_convert.php convert_contacts
