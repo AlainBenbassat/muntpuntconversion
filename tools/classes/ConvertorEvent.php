@@ -7,6 +7,8 @@ class ConvertorEvent {
   private $targetProfile;
   private $customDataFetcher;
   private $targetCustomData;
+  private $scheduledReminderFetcher;
+  private $targetScheduledReminder;
 
   public function __construct() {
     $this->eventFetcher = new SourceEventFetcher();
@@ -15,6 +17,8 @@ class ConvertorEvent {
     $this->targetProfile = new TargetProfile();
     $this->customDataFetcher = new SourceCustomDataFetcher();
     $this->targetCustomData = new TargetCustomData();
+    $this->scheduledReminderFetcher = new SourceScheduledReminderFetcher();
+    $this->targetScheduledReminder = new TargetScheduledReminder();
   }
 
   public function run() {
@@ -51,6 +55,21 @@ class ConvertorEvent {
 
       echo "  converting participants...\n";
       $this->convertEventParticipants($oldEventId, $newEventId);
+
+      if ($this->isFutureEvent($sourceEvent)) {
+        echo "  converting scheduled reminders...\n";
+        $this->convertScheduledReminders($oldEventId, $newEventId);
+      }
+    }
+  }
+
+  private function isFutureEvent($sourceEvent) {
+    $today = date("Y-m-d H:i:s");
+    if ($sourceEvent['start_date'] > $today) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
     }
   }
 
@@ -86,6 +105,13 @@ class ConvertorEvent {
     $dao = $this->profileFetcher->getEventProfiles($sourceEventId);
     while ($profile = $dao->fetch()) {
       $this->targetProfile->createEventProfile($newEventId, $profile);
+    }
+  }
+
+  public function convertScheduledReminders($oldEventId, $newEventId) {
+    $dao = $this->scheduledReminderFetcher->getScheduledRemindersForEvent($oldEventId);
+    while ($schedRem = $dao->fetch()) {
+      $this->targetScheduledReminder->create($newEventId, $schedRem);
     }
   }
 }

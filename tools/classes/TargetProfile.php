@@ -75,11 +75,12 @@ class TargetProfile {
   }
 
   public function createEventProfile($newEventId, $profile) {
-    if ($profile['id'] == 12) {
+    $oldProfileId = $profile['uf_group_id'];
+    if ($oldProfileId == 12) {
       $newProfileId = 12;
     }
     else {
-      $newProfileId = $this->targetMigrationHelper->getNewId('civicrm_uf_group', $profile['id']);
+      $newProfileId = $this->targetMigrationHelper->getNewId('civicrm_uf_group', $oldProfileId);
     }
 
     if ($newProfileId) {
