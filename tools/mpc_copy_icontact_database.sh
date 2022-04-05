@@ -38,6 +38,7 @@ mysqldump  --defaults-file="$REMOTE_ICONTACT_CREDENTIALS" -h 172.25.17.2 -P 3307
   civicrm_uf_field \
   civicrm_uf_join \
   civicrm_recurring_entity \
+  civicrm_action_schedule \
   civicrm_value_diensten_en_producten_4 \
   civicrm_value_media_info_12 \
   civicrm_value_medewerker_type_17 \
