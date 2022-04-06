@@ -22,6 +22,10 @@ class TargetMigrationHelper {
     }
   }
 
+  public function clearHiddenCustomFieldsIds() {
+    CRM_Core_DAO::executeQuery("update civicrm_custom_field set help_post = NULL");
+  }
+
   private static function recreateMigrationIdsTable() {
     CRM_Core_DAO::executeQuery("drop table if exists migration_ids");
     CRM_Core_DAO::executeQuery("

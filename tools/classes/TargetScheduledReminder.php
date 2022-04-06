@@ -46,11 +46,6 @@ class TargetScheduledReminder {
       'effective_start_date',
       'effective_end_date'
     ];
-    /*
-     'sms_body_text',
-    'sms_template_id',
-    'sms_provider_id',
-     */
 
     $params = [
       'sequential' => 1,

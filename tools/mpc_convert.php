@@ -7,6 +7,7 @@ $validTasks = [
   'score_source_contacts' => 'ContactScore',
   'mark_duplicates' => 'ContactDuplicate',
   'clear_migration_ids' => '',
+  'clear_hidden_custom_fields_ids' => '',
   'convert_profiles' => 'ConvertorProfile',
   'convert_campaigns' => 'ConvertorCampaign',
   'convert_contacts' => 'ConvertorContact',
@@ -14,7 +15,7 @@ $validTasks = [
   'convert_relationships' => 'ConvertorRelationship',
   'convert_event_types' => 'ConvertorEventType',
   'convert_events' => 'ConvertorEvent',
-  'all',
+  'all' => '',
 ];
 
 function main() {
@@ -142,6 +143,10 @@ function test_db() {
 
 function clear_migration_ids() {
   TargetMigrationHelper::clearMappingOldIdNewId('all');
+}
+
+function clear_hidden_custom_fields_ids() {
+  TargetMigrationHelper::clearHiddenCustomFieldsIds();
 }
 
 function showUsageAndExit() {

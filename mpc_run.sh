@@ -61,4 +61,9 @@ php tools/mpc_convert.php convert_groups
 php tools/mpc_convert.php convert_event_types
 php tools/mpc_convert.php convert_events
 
+#======================
+# Post conversion steps
+#======================
+php tools/mpc_convert.php clear_hidden_custom_fields_ids
+
 echo "OK"
