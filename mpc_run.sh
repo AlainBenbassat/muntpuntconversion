@@ -59,6 +59,8 @@ php tools/mpc_convert.php convert_contacts
 php tools/mpc_convert.php convert_relationships
 php tools/mpc_convert.php convert_groups
 php tools/mpc_convert.php convert_event_types
+tools/mpc_configure_event_calendar.sh
+[[ $? != 0 ]] && mpc_exit
 php tools/mpc_convert.php convert_events
 
 #======================

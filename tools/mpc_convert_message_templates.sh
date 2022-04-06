@@ -13,7 +13,7 @@ mysqldump \
    --complete-insert \
    db19666 \
   --tables civicrm_msg_template \
-  --where="id in (343,373,375,377,379,399,411,419,421,423,426,443,444)" \
+  --where="id in (75,343,373,375,377,379,399,411,419,421,423,426,443,444)" \
   | \
 mysql --defaults-file="$CIVI_CREDENTIALS"
 
