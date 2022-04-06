@@ -29,18 +29,15 @@ class TargetScheduledReminder {
       'recipient_listing',
       'body_text',
       'body_html',
-      'sms_body_text',
       'subject',
       'record_activity',
       'mapping_id',
       'group_id',
       'msg_template_id',
-      'sms_template_id',
       'absolute_date',
       'from_name',
       'from_email',
       'mode',
-      'sms_provider_id',
       'used_for',
       'filter_contact_language',
       'communication_language',
@@ -49,6 +46,11 @@ class TargetScheduledReminder {
       'effective_start_date',
       'effective_end_date'
     ];
+    /*
+     'sms_body_text',
+    'sms_template_id',
+    'sms_provider_id',
+     */
 
     $params = [
       'sequential' => 1,
