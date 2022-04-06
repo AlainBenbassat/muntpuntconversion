@@ -56,7 +56,7 @@ class TargetScheduledReminder {
     ];
 
     foreach ($fields as $field) {
-      $params[$field] = $sourceSchedRem['field'];
+      $params[$field] = $sourceSchedRem[$field];
     }
 
     return $params;
