@@ -23,6 +23,7 @@ class TargetMigrationHelper {
   }
 
   public function clearHiddenCustomFieldsIds() {
+    CRM_Core_DAO::executeQuery("update civicrm_custom_group set help_post = NULL");
     CRM_Core_DAO::executeQuery("update civicrm_custom_field set help_post = NULL");
   }
 
