@@ -45,4 +45,3 @@ echo "Adding event calendar 'Kalenderweergave' to menu..."
 mysql --defaults-file="$CIVI_CREDENTIALS" <<EOF
 update civicrm_navigation set weight = 0, name = 'Kalenderweergave', label = 'Kalenderweergave', url = 'civicrm/showevents?id=1' where name = 'Show Events Calendar';
 EOF
-[[ $? != 0 ]] && exit 1
