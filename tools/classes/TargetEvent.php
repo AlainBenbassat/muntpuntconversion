@@ -128,50 +128,6 @@ class TargetEvent {
   }
 
   public function createEventType($sourceEventType) {
-    if ($this->existsEventType($sourceEventType['value'])) {
-      $this->updateEventType($sourceEventType);
-    }
-    else {
-      $this->insertEventType($sourceEventType);
-    }
-  }
-
-  private function existsEventType($value) {
-    $id = CRM_Core_DAO::singleValueQuery("select id from civicrm_option_value where option_group_id = " . $this->optionGroupId_EventType . " and value = $value");
-    if ($id) {
-      return TRUE;
-    }
-    else {
-      return FALSE;
-    }
-  }
-
-  private function updateEventType($sourceEventType) {
-    $sql = "
-      update
-        civicrm_option_value
-      set
-        name = %3
-        , label = %4
-        , weight = %5
-        , is_active = %6
-      where
-        option_group_id = %1
-      and
-        value = %2
-    ";
-    $sqlParams = [
-      1 => [$this->optionGroupId_EventType, 'Integer'],
-      2 => [$sourceEventType['value'], 'String'],
-      3 => [$sourceEventType['name'], 'String'],
-      4 => [$sourceEventType['label'], 'String'],
-      5 => [$sourceEventType['weight'], 'Integer'],
-      6 => [$sourceEventType['is_active'], 'Integer'],
-    ];
-    CRM_Core_DAO::executeQuery($sql, $sqlParams);
-  }
-
-  private function insertEventType($sourceEventType) {
     $toRemove = ['id', 'is_optgroup', 'component_id', 'domain_id', 'visibility_id'];
     foreach ($toRemove as $key) {
       unset($sourceEventType[$key]);
@@ -180,6 +136,10 @@ class TargetEvent {
     $sourceEventType['option_group_id'] = $this->optionGroupId_EventType;
 
     civicrm_api3('OptionValue', 'create', $sourceEventType);
+  }
+
+  public function deleteAllEventTypes() {
+    CRM_Core_DAO::executeQuery("delete from civicrm_option_value where option_group_id = " . $this->optionGroupId_EventType);
   }
 
   public function addLocBlock($newEventId, $locBlock) {

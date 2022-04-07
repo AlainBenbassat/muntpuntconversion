@@ -10,7 +10,7 @@ class SourceEventFetcher {
       FROM
         civicrm_event e
       where
-        e.id in (
+        (e.id in (
           select
             distinct p.event_id
           from
@@ -24,6 +24,22 @@ class SourceEventFetcher {
         )
       or
         e.start_date >= '2019-01-01'
+      or
+        e.is_template = 1
+      )
+      and
+        e.event_type_id in (
+          select
+            ov.value
+          from
+            civicrm_option_value ov
+          inner join
+            civicrm_option_group og on ov.option_group_id = og.id and og.name = 'event_type'
+          where
+            ov.is_active = 1
+        )
+      and
+        e.is_active = 1
       order by
         id
     ";
@@ -80,6 +96,8 @@ class SourceEventFetcher {
         civicrm_option_value ov
       inner join
         civicrm_option_group og on ov.option_group_id = og.id and og.name = 'event_type'
+      where
+        ov.is_active = 1
       order by
         value
     ";

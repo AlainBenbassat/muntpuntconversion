@@ -141,6 +141,10 @@ function exportCustomFields($customGroupId, $optionGroups) {
     $name = convertName($customField['name']);
     $label = convertLabel($customField['label']);
 
+    if ($customField['filter'] == 'action=lookup&group=1081') {
+      $customField['filter'] = 'action=get&contact_type=Organization';
+    }
+
     logLine("        \"" . $name . "\": {\n");
     logLine("          \"name\": \"" . $name . "\",\n");
     logLine("          \"label\": \"" . $label . "\",\n");
@@ -256,25 +260,4 @@ function closeLogFile() {
 
 main();
 
-/*
-OLD STUFF - to remove when above works
 
-  $optionGroups = [
-    263 => 'Doelgroep',
-    267 => 'Taal',
-    361 => 'Evenement status',
-    519 => 'Muntpunt zalen',
-    271 => 'Gevoerde promotie',
-    269 => 'Kernfunctie',
-    273 => 'Activiteitensoort',
-    275 => 'Doelstelling',
-    277 => 'Soorten doelgroepen',
-  ];
-
-  $groups = [
-    'private_extraevent' => 'Evenement extra info',
-    'Private_event_info' => 'Evenement planning',
-    'Private_Bios' =>'Evenement BIOS',
-  ];
-
- */

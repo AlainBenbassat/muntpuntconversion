@@ -10,6 +10,8 @@ class ConvertorEventType {
   }
 
   public function run() {
+    $this->targetEvent->deleteAllEventTypes();
+
     $dao = $this->eventFetcher->getEventTypes();
     while ($sourceEventType = $dao->fetch()) {
       echo 'Converting event type ' . $sourceEventType['label'] . ")...\n";

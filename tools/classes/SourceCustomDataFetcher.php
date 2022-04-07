@@ -16,17 +16,7 @@ class SourceCustomDataFetcher {
     return [
       4 => 'Diensten en Producten',
       12 => 'Media info',
-      17 => 'Muntpunt Medewerker type',
-      19 => 'Ouder/Voogd Contact',
       21 => 'BTW Info',
-      25 => 'Overheid Organisatie Type',
-      27 => 'Leverancier Organisatie Type',
-      29 => 'Partner Organisatie Type',
-      31 => 'Overheid Medewerker',
-      37 => 'Leverancier Medewerker Profiel',
-      45 => 'Departement',
-      47 => 'Abonnementen',
-      71 => 'Muntpunt Vrijwilliger Type',
     ];
   }
 
