@@ -23,7 +23,13 @@ class ConvertorProfile {
   private function convertProfileFields($oldProfileId, $newProfileId) {
     $dao = $this->profileFetcher->getProfileFields($oldProfileId);
     while ($profileField = $dao->fetch()) {
-      $this->targetProfile->createField($newProfileId, $profileField);
+      try {
+        $this->targetProfile->createField($newProfileId, $profileField);
+      }
+      catch (Exception $e) {
+        echo "FOUT tijdens converteren van profiel $oldProfileId:\n";
+        var_dump($profileField);
+      }
     }
   }
 }
