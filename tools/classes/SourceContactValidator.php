@@ -5,6 +5,40 @@ class SourceContactValidator {
   public const FINAL_SCORE_DO_NOT_MIGRATE = 0;
   public const GROUPS_TO_MIGRATE = '1949, 1915, 729, 239, 311, 1757, 1891, 2003, 145, 279, 1177, 119, 731, 733, 425, 905, 2041, 1753, 1803, 1799, 1755, 1825, 1815, 1797, 1805, 1859, 1865, 2049, 1121, 1367, 1947, 687, 685, 691, 689, 115, 1399, 2051, 743, 893, 895, 869, 1051, 1049, 1501, 1827, 307, 1143, 2059, 1013, 97, 435, 437, 429, 433, 513, 431, 1499, 105, 333, 1511, 843, 829, 331, 511, 121, 441, 867, 589, 671, 673, 1061, 771, 1053, 1055, 1801, 1059, 767, 1155, 841, 107, 127, 269, 405, 133, 2015, 2011, 2013, 2017, 2019, 1153, 735, 1421, 847';
 
+  public $mustBePartOfGroup;
+
+  public function __construct() {
+    $this->mustBePartOfGroup = CRM_Core_DAO::singleValueQuery("
+      select
+        GROUP_CONCAT(id)
+      from
+        civicrm_group
+      where
+        title in
+        (
+          'Muntpunt AV 20052015',
+          'Muntpunt AV 2010 2015',
+          'Muntpunt AV 2015 2020',
+          'Hou mij op de hoogte: Commons',
+          'Hou mij op de hoogte: Digitale geletterdheid',
+          'Hou mij op de hoogte: Film en documentaire',
+          'Hou mij op de hoogte: Jeugdactiviteiten',
+          'Hou mij op de hoogte: Literatuur en lezen',
+          'Hou mij op de hoogte: Muziek',
+          'Hou mij op de hoogte: Nederlands oefenen',
+          'Hou mij op de hoogte: Wandelingen',
+          'Hou mij op de hoogte: Wegwijs Brussel (cultuur en vrije tijd)',
+          'Hou mij op de hoogte: Wegwijs welzijn en gezondheid',
+          'Hou mij op de hoogte: Wegwijs werken',
+          'Muntpunt medewerkers in dienst',
+          'Muntpunt medewerkers uit dienst',
+          'Partners Infocentrum',
+          'VW-NT2-vrijwilligers',
+          'Wegwijs Onderwijs'
+      )
+    ");
+  }
+
   public function getRating($contact) {
     $rating = [];
 
@@ -352,7 +386,7 @@ class SourceContactValidator {
       WHERE
         gc.status = 'Added'
       and
-        g.id in (" . self::GROUPS_TO_MIGRATE . ")
+        g.id in (" . $this->mustBePartOfGroup . ")
       and
         gc.contact_id = $contactId
     ";
