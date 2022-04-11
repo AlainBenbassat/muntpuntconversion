@@ -60,6 +60,7 @@ installExtensionWithGit com.osseed.eventcalendar https://github.com/osseed/com.o
 installExtensionWithGit finsburypark https://lab.civicrm.org/extensions/finsburypark.git
 installExtensionWithGit mosaicomsgtpl https://lab.civicrm.org/extensions/mosaicomsgtpl.git
 installExtensionWithGit prettyworkflowmessages https://lab.civicrm.org/extensions/prettyworkflowmessages.git
+installExtensionWithGit agendabe https://github.com/AlainBenbassat/agendabe.git
 installExtensionWithCv org.civicrm.recentmenu
 #installExtensionWithCv dataprocessor
 #installExtensionWithGit dataprocessor-duplicatecontacts https://lab.civicrm.org/extensions/dataprocessor-duplicatecontacts.git
