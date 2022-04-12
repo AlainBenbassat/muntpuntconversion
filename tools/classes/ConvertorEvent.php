@@ -56,7 +56,7 @@ class ConvertorEvent {
       echo "  converting participants...\n";
       $this->convertEventParticipants($oldEventId, $newEventId);
 
-      if ($this->isFutureEvent($sourceEvent)) {
+      if ($this->isFutureEvent($sourceEvent) || $this->isEventTemplate($sourceEvent)) {
         echo "  converting scheduled reminders...\n";
         $this->convertScheduledReminders($oldEventId, $newEventId);
       }
@@ -66,6 +66,15 @@ class ConvertorEvent {
   private function isFutureEvent($sourceEvent) {
     $today = date("Y-m-d H:i:s");
     if ($sourceEvent['start_date'] > $today) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  private function isEventTemplate($sourceEvent) {
+    if ($sourceEvent['is_template'] == 1) {
       return TRUE;
     }
     else {
