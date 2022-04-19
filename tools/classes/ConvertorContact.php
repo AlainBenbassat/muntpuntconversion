@@ -79,6 +79,20 @@ class ConvertorContact {
         $this->targetPhone->merge($mainContactId, $sourcePhones);
       }
     }
+
+    if ($contactInfo['heeft_emailadres'] && $contactInfo['email_onhold'] == 0 && !$this->hasEmail($mainContactId)) {
+      $this->targetEmail->create($mainContactId, $contactInfo['email']);
+    }
+  }
+
+  private function hasEmail($newContactId) {
+    $emailId = CRM_Core_DAO::singleValueQuery("select id from civicrm_email where contact_id = $newContactId");
+    if ($emailId > 0) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
   }
 
   private function processMainContactCustomFields($oldMainContactId, $newMainContactId) {

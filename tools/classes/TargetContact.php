@@ -44,6 +44,7 @@ class TargetContact {
 
     $params = [];
     $this->copyMissingParams($mainContact, $duplicateContact, $params, $fieldsTocheck);
+    $this->copySubType($duplicateContact, $params);
 
     if (empty($params)) {
       return FALSE;

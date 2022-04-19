@@ -100,5 +100,8 @@ class TargetAddress {
     elseif ($origLocationTypeId == self::ICONTACT_LT_REDACTIE) {
       $params['location_type_id'] = self::LOCATION_TYPE_REDACTIE;
     }
+    else {
+      $params['location_type_id'] = self::LOCATION_TYPE_MAIN;
+    }
   }
 }

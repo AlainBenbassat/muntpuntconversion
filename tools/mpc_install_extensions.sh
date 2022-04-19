@@ -62,6 +62,7 @@ installExtensionWithGit mosaicomsgtpl https://lab.civicrm.org/extensions/mosaico
 installExtensionWithGit prettyworkflowmessages https://lab.civicrm.org/extensions/prettyworkflowmessages.git
 installExtensionWithGit agendabe https://github.com/AlainBenbassat/agendabe.git
 installExtensionWithCv org.civicrm.recentmenu
+installExtensionWithGit com.aghstrategies.airmail https://github.com/aghstrategies/com.aghstrategies.airmail.git
 #installExtensionWithCv dataprocessor
 #installExtensionWithGit dataprocessor-duplicatecontacts https://lab.civicrm.org/extensions/dataprocessor-duplicatecontacts.git
 

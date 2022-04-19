@@ -142,6 +142,11 @@ class TargetEvent {
     CRM_Core_DAO::executeQuery("delete from civicrm_option_value where option_group_id = " . $this->optionGroupId_EventType);
   }
 
+  public function enableWaitingList() {
+    $sql = "update civicrm_participant_status_type set is_active = 1 where id in (7,9)";
+    CRM_Core_DAO::executeQuery($sql);
+  }
+
   public function addLocBlock($newEventId, $locBlock) {
     if ($this->isLocBlockMuntpunt($locBlock)) {
       if ($this->locBlockMuntpunt == 0) {

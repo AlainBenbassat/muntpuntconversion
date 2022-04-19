@@ -18,5 +18,7 @@ class ConvertorEventType {
 
       $this->targetEvent->createEventType($sourceEventType);
     }
+
+    $this->targetEvent->enableWaitingList();
   }
 }
