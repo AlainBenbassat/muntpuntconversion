@@ -75,7 +75,6 @@ php tools/mpc_convert.php convert_events
 # Post conversion steps
 #======================
 php tools/mpc_convert.php clear_hidden_custom_fields_ids
-tools/mpc_install_zebrix.sh
 
 #===========================
 # Show the current date/time
