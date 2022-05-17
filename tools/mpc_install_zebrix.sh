@@ -6,7 +6,7 @@ cd "$ZEBRIXPATH"
 if [[ ! -d zebrix ]]
 then
   git clone https://github.com/AlainBenbassat/zebrix.git
-elif
+else
   cd zebrix
   git pull
   cd ..
