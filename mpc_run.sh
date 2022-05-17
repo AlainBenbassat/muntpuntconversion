@@ -5,6 +5,14 @@ function mpc_exit {
   exit 1
 }
 
+#===========================
+# Show the current date/time
+#===========================
+echo "----------- starting the conversion -----------"
+date
+echo "-----------------------------------------------"
+echo
+
 #=======================================
 # Make sure we're in the right directory
 #=======================================
@@ -68,4 +76,11 @@ php tools/mpc_convert.php convert_events
 #======================
 php tools/mpc_convert.php clear_hidden_custom_fields_ids
 
-echo "OK"
+#===========================
+# Show the current date/time
+#===========================
+echo
+echo "----------- conversion finished -----------"
+date
+echo "-------------------------------------------"
+echo
