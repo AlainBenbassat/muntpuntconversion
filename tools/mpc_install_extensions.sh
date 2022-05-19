@@ -38,7 +38,7 @@ function installExtensionMuntpuntConfig() {
 }
 
 function installExtensionEventCalendar() {
-  installExtensionWithGit com.osseed.eventcalendar https://github.com/osseed/com.osseed.eventcalendar.git
+  installExtensionWithGit com.osseed.eventcalendar https://github.com/kainuk/com.osseed.eventcalendar
   cd com.osseed.eventcalendar
   git checkout muntpunt
   git pull
