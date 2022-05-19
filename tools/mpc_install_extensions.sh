@@ -69,6 +69,7 @@ installExtensionWithGit prettyworkflowmessages https://lab.civicrm.org/extension
 installExtensionWithGit agendabe https://github.com/AlainBenbassat/agendabe.git
 installExtensionWithCv org.civicrm.recentmenu
 installExtensionWithCv civirules
+installExtensionWithCv ckeditor5
 installExtensionWithGit com.aghstrategies.airmail https://github.com/aghstrategies/com.aghstrategies.airmail.git
 installExtensionWithCv dataprocessor
 installExtensionWithGit dataprocessor-duplicatecontacts https://lab.civicrm.org/extensions/dataprocessor-duplicatecontacts.git
