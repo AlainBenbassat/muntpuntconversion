@@ -77,5 +77,3 @@ installExtensionWithGit nz.co.fuzion.omnipaymultiprocessor https://github.com/ei
 "$CVCOMMAND" ext:upgrade-db
 "$DRUSHCOMMAND" cr
 
-
-}
