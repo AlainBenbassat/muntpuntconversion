@@ -14,7 +14,7 @@ then
 fi
 
 echo "Dumping remote icontact database locally..."
-mysqldump  --defaults-file="$REMOTE_ICONTACT_CREDENTIALS" -h 172.25.17.2 -P 3307 db16377 \
+mysqldump  --defaults-file="$REMOTE_ICONTACT_CREDENTIALS" --skip-triggers -h 172.25.17.2 -P 3307 db16377 \
   civicrm_activity \
   civicrm_activity_contact \
   civicrm_address \
@@ -72,3 +72,7 @@ mysql --defaults-file="$LOCAL_ICONTACT_CREDENTIALS" db19666 < tools/drop_all_tab
 
 echo "Restoring the database locally..."
 mysql --defaults-file="$LOCAL_ICONTACT_CREDENTIALS" db19666 < ../tmp/icontact.sql
+
+echo "Correct is_reserved..."
+echo "update civicrm_msg_template set is_reserved = 0 where is_reserved IS NULL;" | mysql --defaults-file="$LOCAL_ICONTACT_CREDENTIALS" db19666
+
